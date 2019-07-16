@@ -24,7 +24,7 @@ namespace HugeJson2SqlTransformer.Tests.Unit
         private readonly string _jsonFilePath;
         private readonly IJsonFileValidator _jsonFileValidator;
         private readonly ISqlBuilderDirector _sqlBuilderDirector;
-        private string _validJsonContent;
+        private readonly string _validJsonContent;
 
         public Json2SqlTransformerTests()
         {
