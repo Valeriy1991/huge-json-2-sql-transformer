@@ -2,7 +2,7 @@
 {
     public interface ISqlBuilder
     {
-        string CreateTable();
-        string CreateManyInserts();
+        string CreateTable(string tableName, string schema);
+        string CreateManyInserts(string tableName, string schema);
     }
 }

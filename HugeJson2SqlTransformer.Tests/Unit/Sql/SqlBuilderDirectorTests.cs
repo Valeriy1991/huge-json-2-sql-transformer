@@ -17,6 +17,8 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Sql
         private readonly SqlBuilderDirector _testModule;
         private readonly ISqlBuilder _sqlBuilder;
         private readonly string _validJsonContent;
+        private readonly string _tableName;
+        private readonly string _schema;
 
         public SqlBuilderDirectorTests()
         {
@@ -37,7 +39,10 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Sql
 ]
 ";
             _sqlBuilder = Substitute.For<ISqlBuilder>();
-            _testModule = new SqlBuilderDirector(_sqlBuilder);
+
+            _tableName = "some-table";
+            _schema = "dbo";
+            _testModule = new SqlBuilderDirector(_sqlBuilder, _tableName, _schema);
         }
 
         [Theory]
@@ -63,8 +68,8 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Sql
             // Assert
             Received.InOrder(() =>
             {
-                _sqlBuilder.CreateTable();
-                _sqlBuilder.CreateManyInserts();
+                _sqlBuilder.CreateTable(_tableName, _schema);
+                _sqlBuilder.CreateManyInserts(_tableName, _schema);
             });
         }
 
@@ -73,7 +78,7 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Sql
         {
             // Arrange
             var createTableSqlStatement = "create table SQL-statement";
-            _sqlBuilder.CreateTable().Returns(createTableSqlStatement);
+            _sqlBuilder.CreateTable(_tableName, _schema).Returns(createTableSqlStatement);
 
             var manyInsertsSqlStatement = $@"
 insert 1;
@@ -82,7 +87,7 @@ insert 3;
 ...
 insert 10000;
 ";
-            _sqlBuilder.CreateManyInserts().Returns(manyInsertsSqlStatement);
+            _sqlBuilder.CreateManyInserts(_tableName, _schema).Returns(manyInsertsSqlStatement);
 
             var correctSqlStatement = $"{createTableSqlStatement}\n{manyInsertsSqlStatement}";
             // Act
