@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 using Ether.Outcomes;
 using HugeJson2SqlTransformer.Json;
+using HugeJson2SqlTransformer.Json.Abstract;
+using HugeJson2SqlTransformer.Transformers.Abstract;
 
 namespace HugeJson2SqlTransformer.Transformers
 {

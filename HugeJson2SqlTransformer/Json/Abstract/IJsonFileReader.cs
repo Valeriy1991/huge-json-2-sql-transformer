@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace HugeJson2SqlTransformer.Json
+namespace HugeJson2SqlTransformer.Json.Abstract
 {
     public interface IJsonFileReader
     {

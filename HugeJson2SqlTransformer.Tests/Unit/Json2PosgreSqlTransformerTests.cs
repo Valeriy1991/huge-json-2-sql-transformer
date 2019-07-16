@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Bogus;
 using HugeJson2SqlTransformer.Json;
+using HugeJson2SqlTransformer.Json.Abstract;
 using HugeJson2SqlTransformer.Transformers;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
