@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Bogus;
 using Ether.Outcomes;
-using HugeJson2SqlTransformer.Json;
 using HugeJson2SqlTransformer.Json.Abstract;
 using HugeJson2SqlTransformer.Sql.Abstract;
 using HugeJson2SqlTransformer.Transformers;
@@ -12,7 +11,7 @@ using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Xunit;
 
-namespace HugeJson2SqlTransformer.Tests.Unit
+namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
 {
     [ExcludeFromCodeCoverage]
     [Trait("Category", "Unit")]
