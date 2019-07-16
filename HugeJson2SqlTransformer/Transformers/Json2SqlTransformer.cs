@@ -9,13 +9,13 @@ using HugeJson2SqlTransformer.Validators.Abstract;
 
 namespace HugeJson2SqlTransformer.Transformers
 {
-    public class Json2PostgreSqlTransformer : IJson2SqlTransformer
+    public class Json2SqlTransformer : IJson2SqlTransformer
     {
         private readonly IJsonFileReader _jsonFileReader;
         private readonly IJsonFileValidator _jsonFileValidator;
         private readonly ISqlBuilderDirector _sqlBuilderDirector;
 
-        public Json2PostgreSqlTransformer(
+        public Json2SqlTransformer(
             IJsonFileReader jsonFileReader, 
             IJsonFileValidator jsonFileValidator,
             ISqlBuilderDirector sqlBuilderDirector)

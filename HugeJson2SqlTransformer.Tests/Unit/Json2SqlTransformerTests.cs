@@ -16,17 +16,17 @@ namespace HugeJson2SqlTransformer.Tests.Unit
 {
     [ExcludeFromCodeCoverage]
     [Trait("Category", "Unit")]
-    public class Json2PostgreSqlTransformerTests
+    public class Json2SqlTransformerTests
     {
         private readonly Faker _faker = new Faker();
-        private readonly Json2PostgreSqlTransformer _testModule;
+        private readonly Json2SqlTransformer _testModule;
         private readonly IJsonFileReader _jsonFileReader;
         private readonly string _jsonFilePath;
         private readonly IJsonFileValidator _jsonFileValidator;
         private readonly ISqlBuilderDirector _sqlBuilderDirector;
         private string _validJsonContent;
 
-        public Json2PostgreSqlTransformerTests()
+        public Json2SqlTransformerTests()
         {
             _jsonFilePath = "some-file.json";
 
@@ -51,7 +51,7 @@ namespace HugeJson2SqlTransformer.Tests.Unit
 
             _jsonFileValidator = Substitute.For<IJsonFileValidator>();
             _sqlBuilderDirector = Substitute.For<ISqlBuilderDirector>();
-            _testModule = new Json2PostgreSqlTransformer(_jsonFileReader, _jsonFileValidator, _sqlBuilderDirector);
+            _testModule = new Json2SqlTransformer(_jsonFileReader, _jsonFileValidator, _sqlBuilderDirector);
         }
 
         [Theory]
