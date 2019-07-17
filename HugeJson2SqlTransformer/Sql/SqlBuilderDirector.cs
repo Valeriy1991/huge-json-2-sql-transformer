@@ -1,23 +1,32 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using HugeJson2SqlTransformer.Sql.Abstract;
 
+[assembly:InternalsVisibleTo("HugeJson2SqlTransformer.Tests")]
 namespace HugeJson2SqlTransformer.Sql
 {
     public class SqlBuilderDirector : ISqlBuilderDirector
     {
-        private readonly ISqlBuilder _sqlBuilder;
-        private readonly StringBuilder _stringSqlBuilder;
+        internal ISqlBuilder SqlBuilder { get; private set; }
+        internal StringBuilder StringSqlBuilder { get; private set; }
         private readonly string _tableName;
         private readonly string _schema;
 
         public SqlBuilderDirector(ISqlBuilder sqlBuilder, string tableName, string schema)
         {
-            _sqlBuilder = sqlBuilder;
+            SqlBuilder = sqlBuilder;
             _tableName = tableName;
             _schema = schema;
-            _stringSqlBuilder = new StringBuilder();
+            StringSqlBuilder = new StringBuilder();
+        }
+
+        public Task ChangeBuilder(ISqlBuilder sqlBuilder)
+        {
+            SqlBuilder = sqlBuilder;
+            StringSqlBuilder = new StringBuilder();
+            return Task.CompletedTask;
         }
 
         public Task<string> MakeAsync(string jsonContent)
@@ -25,11 +34,11 @@ namespace HugeJson2SqlTransformer.Sql
             if(string.IsNullOrWhiteSpace(jsonContent))
                 throw new ArgumentNullException(nameof(jsonContent));
 
-            _stringSqlBuilder.Append(_sqlBuilder.CreateTable(_tableName, _schema));
-            _stringSqlBuilder.Append("\n");
-            _stringSqlBuilder.Append(_sqlBuilder.CreateManyInserts());
+            StringSqlBuilder.Append(SqlBuilder.CreateTable(_tableName, _schema));
+            StringSqlBuilder.Append("\n");
+            StringSqlBuilder.Append(SqlBuilder.CreateManyInserts(_tableName, _schema));
 
-            return Task.FromResult(_stringSqlBuilder.ToString());
+            return Task.FromResult(StringSqlBuilder.ToString());
         }
     }
 }

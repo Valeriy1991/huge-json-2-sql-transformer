@@ -14,7 +14,7 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Sql
     public class SqlBuilderDirectorTests
     {
         private readonly Faker _faker = new Faker();
-        private readonly SqlBuilderDirector _testModule;
+        private SqlBuilderDirector _testModule;
         private readonly ISqlBuilder _sqlBuilder;
         private readonly string _validJsonContent;
         private readonly string _tableName;
@@ -39,6 +39,8 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Sql
 ]
 ";
             _sqlBuilder = Substitute.For<ISqlBuilder>();
+            _sqlBuilder.CreateTable(_tableName, _schema).Returns("create table");
+            _sqlBuilder.CreateManyInserts(_tableName, _schema).Returns("create many inserts");
 
             _tableName = "some-table";
             _schema = "dbo";
@@ -94,6 +96,41 @@ insert 10000;
             var sql = await _testModule.MakeAsync(_validJsonContent);
             // Assert
             Assert.Equal(correctSqlStatement, sql);
+        }
+
+        [Fact]
+        public void Ctor_SqlBuilderIsCorrect()
+        {
+            // Arrange
+            var sqlBuilder = Substitute.For<ISqlBuilder>();
+            // Act
+            _testModule = new SqlBuilderDirector(sqlBuilder, _tableName, _schema);
+            // Assert
+            Assert.Equal(sqlBuilder, _testModule.SqlBuilder);
+        }
+
+        [Fact]
+        public async Task ChangeBuilder_InnerBuilderWasReallyChanged()
+        {
+            // Arrange
+            var sqlBuilder = Substitute.For<ISqlBuilder>();
+            // Act
+            await _testModule.ChangeBuilder(sqlBuilder);
+            // Assert
+            Assert.Equal(sqlBuilder, _testModule.SqlBuilder);
+        }
+
+        [Fact]
+        public async Task ChangeBuilder_ResetInnerStringBuilder()
+        {
+            // Arrange
+            var sqlBuilder = Substitute.For<ISqlBuilder>();
+            var stringBuilderBeforeChangeBuilder = _testModule.StringSqlBuilder;
+            // Act
+            await _testModule.ChangeBuilder(sqlBuilder);
+            // Assert
+            var stringBuilderAfterChangeBuilder = _testModule.StringSqlBuilder;
+            Assert.NotEqual(stringBuilderBeforeChangeBuilder, stringBuilderAfterChangeBuilder);
         }
     }
 }

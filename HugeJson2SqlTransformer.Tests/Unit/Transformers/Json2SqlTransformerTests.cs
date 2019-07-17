@@ -24,6 +24,7 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
         private readonly IJsonFileValidator _jsonFileValidator;
         private readonly ISqlBuilderDirector _sqlBuilderDirector;
         private readonly string _validJsonContent;
+        private readonly ISqlBuilder _sqlBuilder;
 
         public Json2SqlTransformerTests()
         {
@@ -49,8 +50,9 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
             _jsonFileReader.ReadAllTextAsync(_jsonFilePath).Returns(_validJsonContent);
 
             _jsonFileValidator = Substitute.For<IJsonFileValidator>();
+            _sqlBuilder = Substitute.For<ISqlBuilder>();
             _sqlBuilderDirector = Substitute.For<ISqlBuilderDirector>();
-            _testModule = new Json2SqlTransformer(_jsonFileReader, _jsonFileValidator, _sqlBuilderDirector);
+            _testModule = new Json2SqlTransformer(_jsonFileReader, _jsonFileValidator, _sqlBuilderDirector, _sqlBuilder);
         }
 
         [Theory]
@@ -121,6 +123,16 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
             var partOfErrorMessage = "File has incorrect JSON";
             Assert.True(transformResult.Failure);
             Assert.Equal($"{partOfErrorMessage}: {incorrectJsonValidateMessage}", transformResult.ToString());
+        }
+
+        [Fact]
+        public async Task ExecuteAsync_JsonFileHasValidContent_SqlBuilderDirectorChangeInnerSqlBuilder()
+        {
+            // Arrange
+            // Act
+            await _testModule.ExecuteAsync(_jsonFilePath);
+            // Assert
+            await _sqlBuilderDirector.Received(1).ChangeBuilder(_sqlBuilder);
         }
 
         [Fact]

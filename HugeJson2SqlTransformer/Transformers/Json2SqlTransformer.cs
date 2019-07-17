@@ -14,15 +14,17 @@ namespace HugeJson2SqlTransformer.Transformers
         private readonly IJsonFileReader _jsonFileReader;
         private readonly IJsonFileValidator _jsonFileValidator;
         private readonly ISqlBuilderDirector _sqlBuilderDirector;
+        private readonly ISqlBuilder _sqlBuilder;
 
-        public Json2SqlTransformer(
-            IJsonFileReader jsonFileReader, 
+        public Json2SqlTransformer(IJsonFileReader jsonFileReader,
             IJsonFileValidator jsonFileValidator,
-            ISqlBuilderDirector sqlBuilderDirector)
+            ISqlBuilderDirector sqlBuilderDirector, 
+            ISqlBuilder sqlBuilder)
         {
             _jsonFileReader = jsonFileReader;
             _jsonFileValidator = jsonFileValidator;
             _sqlBuilderDirector = sqlBuilderDirector;
+            _sqlBuilder = sqlBuilder;
         }
 
 
@@ -39,6 +41,7 @@ namespace HugeJson2SqlTransformer.Transformers
                     return Outcomes.Failure<string>()
                         .WithMessage($"File has incorrect JSON: {validationResult.ToString()}");
 
+                await _sqlBuilderDirector.ChangeBuilder(_sqlBuilder);
                 var sql = await _sqlBuilderDirector.MakeAsync(jsonContent);
                 return Outcomes.Success(sql);
             }
