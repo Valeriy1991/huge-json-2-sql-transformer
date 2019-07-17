@@ -16,11 +16,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Integration\" />
+    <ProjectReference Include="..\HugeJson2SqlTransformer\HugeJson2SqlTransformer.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HugeJson2SqlTransformer\HugeJson2SqlTransformer.csproj" />
+    <None Update="Integration\Json\json-example.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
