@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Bogus;
 using HugeJson2SqlTransformer.Sql;
 using HugeJson2SqlTransformer.Sql.Abstract;
+using HugeJson2SqlTransformer.Sql.TableDefinition;
 using NSubstitute;
 using Xunit;
 
@@ -40,7 +42,8 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Sql
 ";
             _sqlBuilder = Substitute.For<ISqlBuilder>();
             _sqlBuilder.CreateTable(_tableName, _schema).Returns("create table");
-            _sqlBuilder.CreateManyInserts(_tableName, _schema).Returns("create many inserts");
+            _sqlBuilder.CreateManyInserts(_tableName, _schema, Arg.Any<List<TableRow>>())
+                .Returns("create many inserts");
 
             _tableName = "some-table";
             _schema = "dbo";
@@ -71,7 +74,7 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Sql
             Received.InOrder(() =>
             {
                 _sqlBuilder.CreateTable(_tableName, _schema);
-                _sqlBuilder.CreateManyInserts(_tableName, _schema);
+                _sqlBuilder.CreateManyInserts(_tableName, _schema, Arg.Any<List<TableRow>>());
             });
         }
 
@@ -89,7 +92,7 @@ insert 3;
 ...
 insert 10000;
 ";
-            _sqlBuilder.CreateManyInserts(_tableName, _schema).Returns(manyInsertsSqlStatement);
+            _sqlBuilder.CreateManyInserts(_tableName, _schema, Arg.Any<List<TableRow>>()).Returns(manyInsertsSqlStatement);
 
             var correctSqlStatement = $"{createTableSqlStatement}\n{manyInsertsSqlStatement}";
             // Act

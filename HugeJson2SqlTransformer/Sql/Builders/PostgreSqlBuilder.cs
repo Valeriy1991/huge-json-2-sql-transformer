@@ -17,7 +17,6 @@ namespace HugeJson2SqlTransformer.Sql.Builders
             }
         }
 
-
         public string CreateTable(string tableName, string schema)
         {
             var stringBuilder = new StringBuilder();
@@ -41,9 +40,33 @@ namespace HugeJson2SqlTransformer.Sql.Builders
             return stringBuilder.ToString();
         }
 
-        public string CreateManyInserts(string tableName, string schema)
+        public string CreateManyInserts(string tableName, string schema, List<TableRow> tableRows)
         {
-            throw new System.NotImplementedException();
+            var stringBuilder = new StringBuilder();
+            stringBuilder.Append($"insert into \"{schema}\".\"{tableName}\" (");
+            for (int i = 0; i < TableColumns.Count; i++)
+            {
+                if (i > 0)
+                {
+                    stringBuilder.Append(", ");
+                }
+                stringBuilder.Append($"\"{TableColumns[i].ColumnName}\"");
+            }
+            stringBuilder.Append(") values");
+
+            // insert data
+            var tableRowsCount = tableRows.Count;
+            for (int i = 0; i < tableRowsCount; i++)
+            {
+                stringBuilder.Append($"\n({tableRows[i].Row})");
+                if (i != tableRowsCount - 1)
+                {
+                    stringBuilder.Append(",");
+                }
+            }
+
+            stringBuilder.Append("\n;");
+            return stringBuilder.ToString();
         }
     }
 }

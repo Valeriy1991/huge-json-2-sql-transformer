@@ -79,5 +79,31 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Sql.Builders
             // Assert
             Assert.Equal(correctSqlStatement, sqlStatement);
         }
+
+        [Fact]
+        public void CreateManyInserts_ReturnCorrectSqlStatement()
+        {
+            // Arrange
+            var tableName = "some-table";
+            var schema = "dbo";
+            var insertingData = new List<TableRow>()
+            {
+                new TableRow("'inserted raw 1'"),
+                new TableRow("'inserted raw 2'"),
+                new TableRow("'inserted raw 3'"),
+                new TableRow("'inserted raw 4'"),
+            };
+            var correctSqlStatement = $@"insert into ""{schema}"".""{tableName}"" (""{_tableColumns[0].ColumnName}"", ""{_tableColumns[1].ColumnName}"", ""{_tableColumns[2].ColumnName}"", ""{_tableColumns[3].ColumnName}"") values
+({insertingData[0].Row}),
+({insertingData[1].Row}),
+({insertingData[2].Row}),
+({insertingData[3].Row})
+;"
+                .Replace("\r\n", "\n");
+            // Act
+            var sqlStatement = _testModule.CreateManyInserts(tableName, schema, insertingData);
+            // Assert
+            Assert.Equal(correctSqlStatement, sqlStatement);
+        }
     }
 }

@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using HugeJson2SqlTransformer.Sql.Abstract;
+using HugeJson2SqlTransformer.Sql.TableDefinition;
 
 [assembly:InternalsVisibleTo("HugeJson2SqlTransformer.Tests")]
 namespace HugeJson2SqlTransformer.Sql
@@ -36,7 +38,7 @@ namespace HugeJson2SqlTransformer.Sql
 
             StringSqlBuilder.Append(SqlBuilder.CreateTable(_tableName, _schema));
             StringSqlBuilder.Append("\n");
-            StringSqlBuilder.Append(SqlBuilder.CreateManyInserts(_tableName, _schema));
+            StringSqlBuilder.Append(SqlBuilder.CreateManyInserts(_tableName, _schema, new List<TableRow>()));
 
             return Task.FromResult(StringSqlBuilder.ToString());
         }
