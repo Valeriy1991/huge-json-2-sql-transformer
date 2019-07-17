@@ -28,7 +28,7 @@ namespace HugeJson2SqlTransformer.Transformers
         }
 
 
-        public async Task<IOutcome<string>> ExecuteAsync(string jsonFilePath)
+        public async Task<IOutcome<string>> ExecuteAsync(string jsonSchema, string jsonFilePath)
         {
             if (string.IsNullOrWhiteSpace(jsonFilePath))
                 return Outcomes.Failure<string>().WithMessage("File path is incorrect");
@@ -36,7 +36,7 @@ namespace HugeJson2SqlTransformer.Transformers
             try
             {
                 var jsonContent = await _jsonFileReader.ReadAllTextAsync(jsonFilePath);
-                var validationResult = await _jsonFileValidator.ValidateAsync(jsonContent);
+                var validationResult = await _jsonFileValidator.ValidateAsync(jsonSchema, jsonContent);
                 if (validationResult.Failure)
                     return Outcomes.Failure<string>()
                         .WithMessage($"File has incorrect JSON: {validationResult.ToString()}");

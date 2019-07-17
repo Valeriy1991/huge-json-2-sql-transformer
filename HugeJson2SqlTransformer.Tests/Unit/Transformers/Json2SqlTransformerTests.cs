@@ -25,10 +25,12 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
         private readonly ISqlBuilderDirector _sqlBuilderDirector;
         private readonly string _validJsonContent;
         private readonly ISqlBuilder _sqlBuilder;
+        private readonly string _jsonSchema;
 
         public Json2SqlTransformerTests()
         {
             _jsonFilePath = "some-file.json";
+            _jsonSchema = "some-json-schema";
 
             _validJsonContent = @"
 [
@@ -63,7 +65,7 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
         {
             // Arrange
             // Act
-            var transformResult = await _testModule.ExecuteAsync(jsonFilePath);
+            var transformResult = await _testModule.ExecuteAsync(_jsonSchema, jsonFilePath);
             // Assert
             Assert.True(transformResult.Failure);
             Assert.Equal("File path is incorrect", transformResult.ToString());
@@ -74,7 +76,7 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
         {
             // Arrange
             // Act
-            var transformResult = await _testModule.ExecuteAsync(_jsonFilePath);
+            var transformResult = await _testModule.ExecuteAsync(_jsonSchema, _jsonFilePath);
             // Assert
             Assert.True(transformResult.Success);
         }
@@ -84,7 +86,7 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
         {
             // Arrange
             // Act
-            await _testModule.ExecuteAsync(_jsonFilePath);
+            await _testModule.ExecuteAsync(_jsonSchema, _jsonFilePath);
             // Assert
             await _jsonFileReader.Received(1).ReadAllTextAsync(_jsonFilePath);
         }
@@ -96,7 +98,7 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
             var errorMessage = "cannot read test JSON file";
             _jsonFileReader.ReadAllTextAsync(Arg.Any<string>()).Throws(new Exception(errorMessage));
             // Act
-            var transformResult = await _testModule.ExecuteAsync(_jsonFilePath);
+            var transformResult = await _testModule.ExecuteAsync(_jsonSchema, _jsonFilePath);
             // Assert
             Assert.True(transformResult.Failure);
             Assert.Equal(errorMessage, transformResult.ToString());
@@ -114,11 +116,11 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
             _jsonFileReader.ReadAllTextAsync(_jsonFilePath).Returns(invalidJsonContent);
 
             var incorrectJsonValidateMessage = "test JSON validation error";
-            _jsonFileValidator.ValidateAsync(invalidJsonContent)
+            _jsonFileValidator.ValidateAsync(_jsonSchema, invalidJsonContent)
                 .Returns(Outcomes.Failure().WithMessage(incorrectJsonValidateMessage));
 
             // Act
-            var transformResult = await _testModule.ExecuteAsync(_jsonFilePath);
+            var transformResult = await _testModule.ExecuteAsync(_jsonSchema, _jsonFilePath);
             // Assert
             var partOfErrorMessage = "File has incorrect JSON";
             Assert.True(transformResult.Failure);
@@ -130,7 +132,7 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
         {
             // Arrange
             // Act
-            await _testModule.ExecuteAsync(_jsonFilePath);
+            await _testModule.ExecuteAsync(_jsonSchema, _jsonFilePath);
             // Assert
             await _sqlBuilderDirector.Received(1).ChangeBuilder(_sqlBuilder);
         }
@@ -140,7 +142,7 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
         {
             // Arrange
             // Act
-            await _testModule.ExecuteAsync(_jsonFilePath);
+            await _testModule.ExecuteAsync(_jsonSchema, _jsonFilePath);
             // Assert
             await _sqlBuilderDirector.Received(1).MakeAsync(Arg.Is<string>(e => e == _validJsonContent));
         }
@@ -152,7 +154,7 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
             var correctSql = "some SQL statements";
             _sqlBuilderDirector.MakeAsync(_validJsonContent).Returns(correctSql);
             // Act
-            var transformResult = await _testModule.ExecuteAsync(_jsonFilePath);
+            var transformResult = await _testModule.ExecuteAsync(_jsonSchema, _jsonFilePath);
             // Assert
             Assert.True(transformResult.Success);
             Assert.Equal(correctSql, transformResult.Value);
