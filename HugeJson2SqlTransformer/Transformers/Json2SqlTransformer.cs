@@ -26,17 +26,17 @@ namespace HugeJson2SqlTransformer.Transformers
         }
 
 
-        public async Task<IOutcome> ExecuteAsync(string sourceJsonFilePath, string targetSqlFilePath)
+        public async Task<IOutcome> ExecuteAsync(Json2SqlTransformOptions transformOptions)
         {
-            if (string.IsNullOrWhiteSpace(sourceJsonFilePath))
+            if (string.IsNullOrWhiteSpace(transformOptions.SourceJsonFile))
                 return Outcomes.Failure().WithMessage("File path is incorrect");
 
             try
             {
-                var jsonContent = await _jsonFileReader.ReadAllTextAsync(sourceJsonFilePath);
+                var jsonContent = await _jsonFileReader.ReadAllTextAsync(transformOptions.SourceJsonFile);
                 await _sqlBuilderDirector.ChangeBuilder(_sqlBuilder);
                 var sql = await _sqlBuilderDirector.MakeAsync(jsonContent);
-                await _fileWriter.WriteAllTextAsync(targetSqlFilePath, sql);
+                await _fileWriter.WriteAllTextAsync(transformOptions.TargetSqlFile, sql);
                 return Outcomes.Success(sql);
             }
             catch (Exception ex)
