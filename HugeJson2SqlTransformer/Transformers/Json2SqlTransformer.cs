@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using Ether.Outcomes;
 using HugeJson2SqlTransformer.Files.Abstract;
@@ -46,8 +47,7 @@ namespace HugeJson2SqlTransformer.Transformers
 
         private Task<string> ReadJsonFile(Json2SqlTransformOptions transformOptions)
         {
-            var jsonFilePath = $"{transformOptions.SourceJsonFilePath}.json";
-            return _fileReader.ReadAllTextAsync(jsonFilePath);
+            return _fileReader.ReadAllTextAsync(transformOptions.SourceJsonFilePath);
         }
 
         private void InitSqlBuilder(Json2SqlTransformOptions transformOptions)
@@ -58,15 +58,25 @@ namespace HugeJson2SqlTransformer.Transformers
 
         private Task CreateFileWithCreateTableSqlStatement(Json2SqlTransformOptions transformOptions)
         {
-            var targetSqlFilePath = $"001-{transformOptions.SourceJsonFileName}-create-table.sql";
+            var sqlTablePath = $"{transformOptions.TableSchema}_{transformOptions.TableName}";
+            var targetSqlFileName = $"001-create-table-{sqlTablePath}.sql";
+            var targetSqlFilePath = Path.Combine(GenerateSqlDirectoryPath(transformOptions), targetSqlFileName);
 
             var createTableStatement = _sqlBuilder.BuildCreateTable();
             return _fileWriter.WriteAllTextAsync(targetSqlFilePath, createTableStatement);
         }
 
+        private string GenerateSqlDirectoryPath(Json2SqlTransformOptions transformOptions)
+        {
+            return $@"{transformOptions.SourceDirectoryPath}\{transformOptions.SourceJsonFileName}";
+        }
+
         private Task CreateFileWithInsertSqlStatements(Json2SqlTransformOptions transformOptions, string jsonContent)
         {
-            var targetSqlFilePath = $"002-{transformOptions.SourceJsonFileName}-insert-values.sql";
+            var sqlTablePath = $"{transformOptions.TableSchema}_{transformOptions.TableName}";
+            var targetSqlFileName = $"002-insert-values-into-{sqlTablePath}.sql";
+            var targetSqlFilePath = Path.Combine(GenerateSqlDirectoryPath(transformOptions), targetSqlFileName);
+
             var insertStatement = _sqlBuilder.BuildInsert(jsonContent);
             return _fileWriter.WriteAllTextAsync(targetSqlFilePath, insertStatement);
         }

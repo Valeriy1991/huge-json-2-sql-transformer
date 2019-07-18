@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Threading.Tasks;
 using Bogus;
 using Ether.Outcomes;
@@ -20,17 +21,21 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
         private readonly Json2SqlTransformer _testModule;
         private readonly IFileReader _fileReader;
         private readonly string _sourceJsonFileName;
+        private readonly string _sourceJsonFilePath;
         private readonly Json2SqlTransformOptions _transformOptions;
         private readonly string _validJsonContent;
         private readonly ISqlBuilder _sqlBuilder;
         private readonly IFileWriter _fileWriter;
+        private readonly string _sourceDirectory;
 
         public Json2SqlTransformerTests()
         {
+            _sourceDirectory = "folder";
             _sourceJsonFileName = "some-file";
+            _sourceJsonFilePath = $@"{_sourceDirectory}\{_sourceJsonFileName}.json";
             _transformOptions = new Json2SqlTransformOptions()
             {
-                SourceJsonFilePath = _sourceJsonFileName,
+                SourceJsonFilePath = _sourceJsonFilePath,
             };
 
             _validJsonContent = @"
@@ -50,7 +55,7 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
 ]
 ";
             _fileReader = Substitute.For<IFileReader>();
-            _fileReader.ReadAllTextAsync($"{_sourceJsonFileName}.json").Returns(_validJsonContent);
+            _fileReader.ReadAllTextAsync(_sourceJsonFilePath).Returns(_validJsonContent);
 
             _sqlBuilder = Substitute.For<ISqlBuilder>();
             _fileWriter = Substitute.For<IFileWriter>();
@@ -86,11 +91,10 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
         public async Task ExecuteAsync_JsonFilePathIsCorrect_JsonFileWasRead()
         {
             // Arrange
-            var correctJsonFilePath = $"{_sourceJsonFileName}.json";
             // Act
             await _testModule.ExecuteAsync(_transformOptions);
             // Assert
-            await _fileReader.Received(1).ReadAllTextAsync(correctJsonFilePath);
+            await _fileReader.Received(1).ReadAllTextAsync(_sourceJsonFilePath);
         }
 
         [Fact]
@@ -176,7 +180,8 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
         public async Task ExecuteAsync_FileWithSqlStatementOfCreateTableWasCreated()
         {
             // Arrange
-            var correctFilePath = $"001-{_sourceJsonFileName}-create-table.sql";
+            var correctFileName = $"001-create-table-{_transformOptions.TableSchema}_{_transformOptions.TableName}.sql";
+            var correctFilePath = Path.Combine(_sourceDirectory, _sourceJsonFileName, correctFileName);
             var correctCreateTableSqlStatement = "create table SQL statement";
             _sqlBuilder.BuildCreateTable().Returns(correctCreateTableSqlStatement);
             // Act
@@ -189,7 +194,8 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
         public async Task ExecuteAsync_FileWithSqlStatementOfInsertValuesWasCreated()
         {
             // Arrange
-            var correctFilePath = $"002-{_sourceJsonFileName}-insert-values.sql";
+            var correctFileName = $"002-insert-values-into-{_transformOptions.TableSchema}_{_transformOptions.TableName}.sql";
+            var correctFilePath = Path.Combine(_sourceDirectory, _sourceJsonFileName, correctFileName);
             var correctInsertValuesSqlStatement = "create table SQL statement";
             _sqlBuilder.BuildInsert(_validJsonContent).Returns(correctInsertValuesSqlStatement);
             // Act

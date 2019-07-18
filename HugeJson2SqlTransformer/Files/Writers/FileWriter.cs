@@ -9,11 +9,23 @@ namespace HugeJson2SqlTransformer.Files.Writers
     {
         public Task WriteAllTextAsync(string path, string content)
         {
+            CreateDirectoryIfNotExists(path);
             return File.WriteAllTextAsync(path, content, Encoding.UTF8);
         }
+
         public Task WriteAllTextAsync(string path, string content, Encoding encoding)
         {
+            CreateDirectoryIfNotExists(path);
             return File.WriteAllTextAsync(path, content, encoding);
+        }
+
+        private void CreateDirectoryIfNotExists(string path)
+        {
+            var directory = Path.GetDirectoryName(path);
+            if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
         }
     }
 }

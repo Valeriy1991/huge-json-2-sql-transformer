@@ -13,7 +13,7 @@ namespace HugeJson2SqlTransformer.Tests.Integration.Files.Writers
     public class FileWriterTests : IDisposable
     {
         private readonly FileWriter _testModule;
-        private readonly string _path;
+        private string _path;
 
         public FileWriterTests()
         {
@@ -58,6 +58,23 @@ namespace HugeJson2SqlTransformer.Tests.Integration.Files.Writers
             }
 
             return createdFileEncoding;
+        }
+
+        [Fact]
+        public async Task WriteAllTextAsync_DirectoryCreatedSuccessfullyIfNotExists()
+        {
+            // Arrange
+            var content = "Some file content";
+            var directory = "test-dir";
+            var path = Path.Combine(directory, _path);
+            // Act
+            await _testModule.WriteAllTextAsync(path, content);
+            // Assert
+            Directory.Exists(_path);
+
+            // Post-test actions:
+            File.Delete(path);
+            Directory.Delete(directory);
         }
 
         public void Dispose()
