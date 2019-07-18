@@ -81,27 +81,48 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Sql.Builders
         }
 
         [Fact]
-        public void CreateManyInserts_ReturnCorrectSqlStatement()
+        public void CreateInsert_ReturnCorrectSqlStatement()
         {
             // Arrange
             var tableName = "some-table";
             var schema = "dbo";
-            var insertingData = new List<TableRow>()
-            {
-                new TableRow("'inserted raw 1'"),
-                new TableRow("'inserted raw 2'"),
-                new TableRow("'inserted raw 3'"),
-                new TableRow("'inserted raw 4'"),
-            };
-            var correctSqlStatement = $@"insert into ""{schema}"".""{tableName}"" (""{_tableColumns[0].ColumnName}"", ""{_tableColumns[1].ColumnName}"", ""{_tableColumns[2].ColumnName}"", ""{_tableColumns[3].ColumnName}"") values
-({insertingData[0].Row}),
-({insertingData[1].Row}),
-({insertingData[2].Row}),
-({insertingData[3].Row})
-;"
+            var jsonItems = @"[
+    {
+	    ""firstName"": ""James"",
+        ""lastName"": ""Bond"",
+        ""isClient"": false,
+        ""phone"": ""james-bond@example.com""
+    },
+    {
+	    ""firstName"": ""John"",
+        ""lastName"": ""Doe"",
+        ""isClient"": true,
+        ""phone"": ""john-doe@example.com""
+    }
+]";
+            var correctSqlStatement =
+                    $@"insert into ""{schema}"".""{tableName}"" (
+    ""{_tableColumns[0].ColumnName}""
+    , ""{_tableColumns[1].ColumnName}""
+    , ""{_tableColumns[2].ColumnName}""
+    , ""{_tableColumns[3].ColumnName}""
+)
+select
+    ""{_tableColumns[0].ColumnName}""
+    , ""{_tableColumns[1].ColumnName}""
+    , ""{_tableColumns[2].ColumnName}""
+    , ""{_tableColumns[3].ColumnName}""
+from json_to_recordset('
+{jsonItems}
+') as x(
+    ""{_tableColumns[0].ColumnName}"" {_tableColumns[0].ColumnType} not null
+    , ""{_tableColumns[1].ColumnName}"" {_tableColumns[1].ColumnType} not null
+    , ""{_tableColumns[2].ColumnName}"" {_tableColumns[2].ColumnType}
+    , ""{_tableColumns[3].ColumnName}"" {_tableColumns[3].ColumnType}
+);"
                 .Replace("\r\n", "\n");
             // Act
-            var sqlStatement = _testModule.CreateManyInserts(tableName, schema, insertingData);
+            var sqlStatement = _testModule.CreateInsert(tableName, schema, jsonItems);
             // Assert
             Assert.Equal(correctSqlStatement, sqlStatement);
         }

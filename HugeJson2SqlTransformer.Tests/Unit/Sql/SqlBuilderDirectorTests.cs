@@ -42,7 +42,7 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Sql
 ";
             _sqlBuilder = Substitute.For<ISqlBuilder>();
             _sqlBuilder.CreateTable(_tableName, _schema).Returns("create table");
-            _sqlBuilder.CreateManyInserts(_tableName, _schema, Arg.Any<List<TableRow>>())
+            _sqlBuilder.CreateInsert(_tableName, _schema, _validJsonContent)
                 .Returns("create many inserts");
 
             _tableName = "some-table";
@@ -74,7 +74,7 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Sql
             Received.InOrder(() =>
             {
                 _sqlBuilder.CreateTable(_tableName, _schema);
-                _sqlBuilder.CreateManyInserts(_tableName, _schema, Arg.Any<List<TableRow>>());
+                _sqlBuilder.CreateInsert(_tableName, _schema, _validJsonContent);
             });
         }
 
@@ -92,7 +92,7 @@ insert 3;
 ...
 insert 10000;
 ";
-            _sqlBuilder.CreateManyInserts(_tableName, _schema, Arg.Any<List<TableRow>>()).Returns(manyInsertsSqlStatement);
+            _sqlBuilder.CreateInsert(_tableName, _schema, _validJsonContent).Returns(manyInsertsSqlStatement);
 
             var correctSqlStatement = $"{createTableSqlStatement}\n{manyInsertsSqlStatement}";
             // Act

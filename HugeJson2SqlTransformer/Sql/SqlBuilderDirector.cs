@@ -38,7 +38,7 @@ namespace HugeJson2SqlTransformer.Sql
 
             StringSqlBuilder.Append(SqlBuilder.CreateTable(_tableName, _schema));
             StringSqlBuilder.Append("\n");
-            StringSqlBuilder.Append(SqlBuilder.CreateManyInserts(_tableName, _schema, new List<TableRow>()));
+            StringSqlBuilder.Append(SqlBuilder.CreateInsert(_tableName, _schema, jsonContent));
 
             return Task.FromResult(StringSqlBuilder.ToString());
         }
