@@ -12,7 +12,6 @@ namespace HugeJson2SqlTransformer.Transformers
         internal string SourceDirectoryPath => Path.GetDirectoryName(SourceJsonFilePath);
         internal string SourceJsonFileName => Path.GetFileNameWithoutExtension(SourceJsonFilePath);
 
-        public bool NeedSplitAllSqlDeclarations { get; set; } = true;
         public int? InsertSplitLines { get; set; }
 
         public string TableSchema { get; set; }

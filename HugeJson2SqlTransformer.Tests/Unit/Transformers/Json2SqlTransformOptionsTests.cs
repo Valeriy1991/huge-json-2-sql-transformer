@@ -16,17 +16,7 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
         {
             _testModule = new Json2SqlTransformOptions();
         }
-
-        [Fact]
-        public void Ctor_NeedSplitAllSqlDeclarationsIsTrue()
-        {
-            // Arrange
-            // Act
-            var needSplitAllSqlDeclarations = _testModule.NeedSplitAllSqlDeclarations;
-            // Assert
-            Assert.True(needSplitAllSqlDeclarations);
-        }
-
+        
         [Fact]
         public void SourceJsonFileName_ReturnOnlyFileNameWithoutExtension()
         {
