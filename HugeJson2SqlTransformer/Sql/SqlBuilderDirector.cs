@@ -16,9 +16,8 @@ namespace HugeJson2SqlTransformer.Sql
         private readonly string _tableName;
         private readonly string _schema;
 
-        public SqlBuilderDirector(ISqlBuilder sqlBuilder, string tableName, string schema)
+        public SqlBuilderDirector(string tableName, string schema)
         {
-            SqlBuilder = sqlBuilder;
             _tableName = tableName;
             _schema = schema;
             StringSqlBuilder = new StringBuilder();

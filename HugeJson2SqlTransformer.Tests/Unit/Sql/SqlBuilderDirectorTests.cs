@@ -47,7 +47,7 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Sql
 
             _tableName = "some-table";
             _schema = "dbo";
-            _testModule = new SqlBuilderDirector(_sqlBuilder, _tableName, _schema);
+            _testModule = new SqlBuilderDirector(_tableName, _schema);
         }
 
         [Theory]
@@ -101,16 +101,49 @@ insert 10000;
             Assert.Equal(correctSqlStatement, sql);
         }
 
+        #region Ctor
+
         [Fact]
-        public void Ctor_SqlBuilderIsCorrect()
+        public void Ctor_SqlBuilderIsNull()
         {
             // Arrange
-            var sqlBuilder = Substitute.For<ISqlBuilder>();
             // Act
-            _testModule = new SqlBuilderDirector(sqlBuilder, _tableName, _schema);
+            _testModule = new SqlBuilderDirector(_tableName, _schema);
             // Assert
-            Assert.Equal(sqlBuilder, _testModule.SqlBuilder);
+            Assert.Null(_testModule.SqlBuilder);
         }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public void Ctor_TableNameIsNullOrEmpty_ThrowExceptionWithCorrectMessage(string tableName)
+        {
+            // Arrange
+            Action act = () => new SqlBuilderDirector(tableName, _schema);
+            // Act
+            var ex = Record.Exception(act);
+            // Assert
+            Assert.IsType<ArgumentNullException>(ex);
+            Assert.Contains("nameof(tableName)", ex.Message);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public void Ctor_SchemaIsNullOrEmpty_ThrowExceptionWithCorrectMessage(string schema)
+        {
+            // Arrange
+            Action act = () => new SqlBuilderDirector(_tableName, schema);
+            // Act
+            var ex = Record.Exception(act);
+            // Assert
+            Assert.IsType<ArgumentNullException>(ex);
+            Assert.Contains("nameof(tableName)", ex.Message);
+        }
+
+        #endregion
 
         [Fact]
         public async Task ChangeBuilder_InnerBuilderWasReallyChanged()
