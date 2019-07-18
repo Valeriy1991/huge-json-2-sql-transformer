@@ -20,9 +20,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Integration\Json\mongo-db-compass-v1.17.0-json-example.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Integration\Json\json-example.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
 
 </Project>

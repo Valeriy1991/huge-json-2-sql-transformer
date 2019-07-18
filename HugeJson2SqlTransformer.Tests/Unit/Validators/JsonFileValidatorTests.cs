@@ -25,7 +25,7 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Validators
     'firstName': {'type': 'string'},
     'lastName': {'type': 'string'},
     'isClient': {'type': 'boolean'},
-    'phone': {'type': 'string'}
+    'email': {'type': 'string'}
   }
 }
 ";
@@ -38,13 +38,13 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Validators
         ""firstName"": ""James"",
         ""lastName"": ""Bond"",
         ""isClient"": false,
-        ""phone"": ""james-bond@example.com""
+        ""email"": ""james-bond@example.com""
     },
     {
         ""firstName"": ""John"",
         ""lastName"": ""Doe"",
         ""isClient"": true,
-        ""phone"": ""john-doe@example.com""
+        ""email"": ""john-doe@example.com""
     }
 ]
 ";

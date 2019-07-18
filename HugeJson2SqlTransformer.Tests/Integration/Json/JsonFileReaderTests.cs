@@ -31,7 +31,7 @@ namespace HugeJson2SqlTransformer.Tests.Integration.Json
         }
 
         [Fact]
-        public async Task ReadAllTextAsync_FileExists_ReturnFileContent()
+        public async Task ReadAllTextAsync_JsonFileExists_ReturnJsonContent()
         {
             // Arrange
             var existingJsonFilePath = ".\\Integration\\Json\\json-example.json";

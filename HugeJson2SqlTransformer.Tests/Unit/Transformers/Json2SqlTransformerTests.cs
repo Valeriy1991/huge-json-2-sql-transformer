@@ -38,13 +38,13 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
 	    ""firstName"": ""James"",
         ""lastName"": ""Bond"",
         ""isClient"": false,
-        ""phone"": ""james-bond@example.com""
+        ""email"": ""james-bond@example.com""
     },
     {
 	    ""firstName"": ""John"",
         ""lastName"": ""Doe"",
         ""isClient"": true,
-        ""phone"": ""john-doe@example.com""
+        ""email"": ""john-doe@example.com""
     }
 ]
 ";

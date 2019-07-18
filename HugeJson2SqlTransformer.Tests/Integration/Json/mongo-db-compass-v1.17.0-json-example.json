@@ -1,0 +1,2 @@
+{"firstName":"James", "lastName":"Bond", "isClient":false, "email":"james-bond@example.com"}
+{"firstName":"John", "lastName":"Doe", "isClient":true, "email":"john-doe@example.com"}
