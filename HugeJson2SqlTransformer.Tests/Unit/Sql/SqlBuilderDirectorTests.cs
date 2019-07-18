@@ -48,13 +48,14 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Sql
             _tableName = "some-table";
             _schema = "dbo";
             _testModule = new SqlBuilderDirector(_tableName, _schema);
+            _testModule.ChangeBuilder(_sqlBuilder).GetAwaiter().GetResult();
         }
 
         [Theory]
         [InlineData(null)]
         [InlineData("")]
         [InlineData(" ")]
-        public async Task MakeAsync_JsonContentIsNullOrEmpty_ThrowArgumentNullException(string jsonContent)
+        public async Task MakeAsync_JsonContentIsNullOrEmpty_ThrowExceptionWithCorrectMessage(string jsonContent)
         {
             // Arrange
             Func<Task<string>> act = () => _testModule.MakeAsync(jsonContent);
@@ -62,6 +63,20 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Sql
             var ex = await Record.ExceptionAsync(act);
             // Assert
             Assert.IsType<ArgumentNullException>(ex);
+            Assert.Contains("jsonContent", ex.Message);
+        }
+
+        [Fact]
+        public async Task MakeAsync_SqlBuilderWasNotInit_ThrowExceptionWithCorrectMessage()
+        {
+            // Arrange
+            await _testModule.ChangeBuilder(null);
+            Func<Task<string>> act = () => _testModule.MakeAsync(_validJsonContent);
+            // Act
+            var ex = await Record.ExceptionAsync(act);
+            // Assert
+            Assert.IsType<NullReferenceException>(ex);
+            Assert.Equal("\"SqlBuilder\" is null", ex.Message);
         }
 
         [Fact]
@@ -125,7 +140,7 @@ insert 10000;
             var ex = Record.Exception(act);
             // Assert
             Assert.IsType<ArgumentNullException>(ex);
-            Assert.Contains("nameof(tableName)", ex.Message);
+            Assert.Contains(nameof(tableName), ex.Message);
         }
 
         [Theory]
@@ -140,7 +155,7 @@ insert 10000;
             var ex = Record.Exception(act);
             // Assert
             Assert.IsType<ArgumentNullException>(ex);
-            Assert.Contains("nameof(tableName)", ex.Message);
+            Assert.Contains(nameof(schema), ex.Message);
         }
 
         #endregion

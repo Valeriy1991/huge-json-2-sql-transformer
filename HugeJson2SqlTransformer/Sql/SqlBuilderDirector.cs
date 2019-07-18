@@ -18,6 +18,12 @@ namespace HugeJson2SqlTransformer.Sql
 
         public SqlBuilderDirector(string tableName, string schema)
         {
+            if(string.IsNullOrWhiteSpace(tableName))
+                throw new ArgumentNullException(nameof(tableName));
+
+            if (string.IsNullOrWhiteSpace(schema))
+                throw new ArgumentNullException(nameof(schema));
+
             _tableName = tableName;
             _schema = schema;
             StringSqlBuilder = new StringBuilder();
@@ -34,6 +40,9 @@ namespace HugeJson2SqlTransformer.Sql
         {
             if(string.IsNullOrWhiteSpace(jsonContent))
                 throw new ArgumentNullException(nameof(jsonContent));
+
+            if (SqlBuilder == null)
+                throw new NullReferenceException($"\"{nameof(SqlBuilder)}\" is null");
 
             StringSqlBuilder.Append(SqlBuilder.CreateTable(_tableName, _schema));
             StringSqlBuilder.Append("\n");
