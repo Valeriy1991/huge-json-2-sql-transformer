@@ -66,15 +66,30 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
         [InlineData(null)]
         [InlineData("")]
         [InlineData(" ")]
-        public async Task ExecuteAsync_JsonFilePathIsNullOrEmpty_ReturnFailureWithCorrectMessage(string jsonFilePath)
+        public async Task ExecuteAsync_SourceJsonFilePathIsNullOrEmpty_ReturnFailureWithCorrectMessage(string sourceJsonFilePath)
         {
             // Arrange
-            _transformOptions.SourceJsonFile = jsonFilePath;
+            _transformOptions.SourceJsonFile = sourceJsonFilePath;
             // Act
             var transformResult = await _testModule.ExecuteAsync(_transformOptions);
             // Assert
             Assert.True(transformResult.Failure);
-            Assert.Equal("File path is incorrect", transformResult.ToString());
+            Assert.Equal("Source file path is incorrect", transformResult.ToString());
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public async Task ExecuteAsync_TargetSqlFilePathIsNullOrEmpty_ReturnFailureWithCorrectMessage(string targetSqlFilePath)
+        {
+            // Arrange
+            _transformOptions.TargetSqlFile = targetSqlFilePath;
+            // Act
+            var transformResult = await _testModule.ExecuteAsync(_transformOptions);
+            // Assert
+            Assert.True(transformResult.Failure);
+            Assert.Equal("Target file path is incorrect", transformResult.ToString());
         }
 
         [Fact]

@@ -29,7 +29,9 @@ namespace HugeJson2SqlTransformer.Transformers
         public async Task<IOutcome> ExecuteAsync(Json2SqlTransformOptions transformOptions)
         {
             if (string.IsNullOrWhiteSpace(transformOptions.SourceJsonFile))
-                return Outcomes.Failure().WithMessage("File path is incorrect");
+                return Outcomes.Failure().WithMessage("Source file path is incorrect");
+            if (string.IsNullOrWhiteSpace(transformOptions.TargetSqlFile))
+                return Outcomes.Failure().WithMessage("Target file path is incorrect");
 
             try
             {
