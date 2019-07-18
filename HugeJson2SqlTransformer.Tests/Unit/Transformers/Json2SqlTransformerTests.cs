@@ -18,14 +18,13 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
     {
         private readonly Faker _faker = new Faker();
         private readonly Json2SqlTransformer _testModule;
-        private readonly IFileReader _jsonFileReader;
+        private readonly IFileReader _fileReader;
         private readonly string _sourceJsonFile;
         private readonly string _targetSqlFile;
         private readonly Json2SqlTransformOptions _transformOptions;
-        private readonly ISqlBuilderDirector _sqlBuilderDirector;
         private readonly string _validJsonContent;
         private readonly ISqlBuilder _sqlBuilder;
-        private readonly IFileWriter _sqlFileWriter;
+        private readonly IFileWriter _fileWriter;
 
         public Json2SqlTransformerTests()
         {
@@ -53,13 +52,12 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
     }
 ]
 ";
-            _jsonFileReader = Substitute.For<IFileReader>();
-            _jsonFileReader.ReadAllTextAsync(_sourceJsonFile).Returns(_validJsonContent);
+            _fileReader = Substitute.For<IFileReader>();
+            _fileReader.ReadAllTextAsync(_sourceJsonFile).Returns(_validJsonContent);
 
             _sqlBuilder = Substitute.For<ISqlBuilder>();
-            _sqlBuilderDirector = Substitute.For<ISqlBuilderDirector>();
-            _sqlFileWriter = Substitute.For<IFileWriter>();
-            _testModule = new Json2SqlTransformer(_jsonFileReader, _sqlFileWriter, _sqlBuilderDirector, _sqlBuilder);
+            _fileWriter = Substitute.For<IFileWriter>();
+            _testModule = new Json2SqlTransformer(_fileReader, _fileWriter, _sqlBuilder);
         }
 
         [Theory]
@@ -109,7 +107,7 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
             // Act
             await _testModule.ExecuteAsync(_transformOptions);
             // Assert
-            await _jsonFileReader.Received(1).ReadAllTextAsync(_sourceJsonFile);
+            await _fileReader.Received(1).ReadAllTextAsync(_sourceJsonFile);
         }
 
         [Fact]
@@ -117,7 +115,7 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
         {
             // Arrange
             var errorMessage = "cannot read test JSON file";
-            _jsonFileReader.ReadAllTextAsync(Arg.Any<string>()).Throws(new Exception(errorMessage));
+            _fileReader.ReadAllTextAsync(Arg.Any<string>()).Throws(new Exception(errorMessage));
             // Act
             var transformResult = await _testModule.ExecuteAsync(_transformOptions);
             // Assert
@@ -126,31 +124,34 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
         }
 
         [Fact]
-        public async Task ExecuteAsync_JsonFileHasValidContent_SqlBuilderDirectorChangeInnerSqlBuilder()
+        public async Task ExecuteAsync_JsonFileHasValidContent_BuildCreateTableWasCalled()
         {
             // Arrange
             // Act
             await _testModule.ExecuteAsync(_transformOptions);
             // Assert
-            await _sqlBuilderDirector.Received(1).ChangeBuilder(_sqlBuilder);
+            _sqlBuilder.Received(1).BuildCreateTable();
         }
 
         [Fact]
-        public async Task ExecuteAsync_JsonFileHasValidContent_SqlBuilderDirectorWasCalled()
+        public async Task ExecuteAsync_JsonFileHasValidContent_BuildInsertWasCalled()
         {
             // Arrange
             // Act
             await _testModule.ExecuteAsync(_transformOptions);
             // Assert
-            await _sqlBuilderDirector.Received(1).MakeAsync(Arg.Is<string>(e => e == _validJsonContent));
+            _sqlBuilder.Received(1).BuildInsert(_validJsonContent);
         }
 
         [Fact]
         public async Task ExecuteAsync_JsonFileHasValidContent_ReturnSuccess()
         {
             // Arrange
-            var correctSql = "some SQL statements";
-            _sqlBuilderDirector.MakeAsync(_validJsonContent).Returns(correctSql);
+            var correctCreateTableStatement = "create table SQL";
+            var correctInsertStatement = "insert to SQL table";
+
+            _sqlBuilder.BuildCreateTable().Returns(correctCreateTableStatement);
+            _sqlBuilder.BuildInsert(_validJsonContent).Returns(correctInsertStatement);
             // Act
             var transformResult = await _testModule.ExecuteAsync(_transformOptions);
             // Assert
@@ -161,12 +162,47 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
         public async Task ExecuteAsync_JsonFileHasValidContent_SqlStatementWasWroteToFileSuccessfully()
         {
             // Arrange
-            var correctSql = "some SQL statements";
-            _sqlBuilderDirector.MakeAsync(_validJsonContent).Returns(correctSql);
+            var correctCreateTableStatement = "create table SQL";
+            var correctInsertStatement = "insert to SQL table";
+            var correctSqlFileContent = $"{correctCreateTableStatement}\n{correctInsertStatement}";
+            
+            _sqlBuilder.BuildCreateTable().Returns(correctCreateTableStatement);
+            _sqlBuilder.BuildInsert(_validJsonContent).Returns(correctInsertStatement);
             // Act
             await _testModule.ExecuteAsync(_transformOptions);
             // Assert
-            await _sqlFileWriter.Received(1).WriteAllTextAsync(_targetSqlFile, correctSql);
+            await _fileWriter.Received(1).WriteAllTextAsync(_targetSqlFile, correctSqlFileContent);
+        }
+
+        [Fact]
+        public async Task ExecuteAsync_JsonFileHasValidContent_DatabaseSchemaWasSetUpForSqlBuilder()
+        {
+            // Arrange
+            // Act
+            await _testModule.ExecuteAsync(_transformOptions);
+            // Assert
+            _sqlBuilder.Received(1).SetSchema(_transformOptions.TableSchema);
+        }
+
+        [Fact]
+        public async Task ExecuteAsync_JsonFileHasValidContent_DatabaseTableNameWasSetUpForSqlBuilder()
+        {
+            // Arrange
+            // Act
+            await _testModule.ExecuteAsync(_transformOptions);
+            // Assert
+            _sqlBuilder.Received(1).SetTableName(_transformOptions.TableName);
+        }
+
+        [Fact]
+        public async Task ExecuteAsync_JsonFileHasValidContent_CreateTableAndInsertStatementsWasBuiltSeparately()
+        {
+            // Arrange
+            // Act
+            await _testModule.ExecuteAsync(_transformOptions);
+            // Assert
+            _sqlBuilder.Received(1).BuildCreateTable();
+            _sqlBuilder.Received(1).BuildInsert(_validJsonContent);
         }
     }
 }

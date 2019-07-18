@@ -5,7 +5,11 @@ namespace HugeJson2SqlTransformer.Sql.Abstract
 {
     public interface ISqlBuilder
     {
-        string CreateTable(string tableName, string schema);
-        string CreateInsert(string tableName, string schema, string jsonArray);
+        string Schema { get; }
+        string Table { get; }
+        string BuildCreateTable();
+        string BuildInsert(string jsonArray);
+        void SetSchema(string schema);
+        void SetTableName(string tableName);
     }
 }

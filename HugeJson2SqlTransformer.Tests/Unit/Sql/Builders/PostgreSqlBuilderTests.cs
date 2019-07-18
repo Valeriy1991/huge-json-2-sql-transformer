@@ -17,6 +17,8 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Sql.Builders
         private readonly Faker _faker = new Faker();
         private readonly PostgreSqlBuilder _testModule;
         private readonly List<TableColumn> _tableColumns;
+        private readonly string _schema;
+        private readonly string _tableName;
 
         public PostgreSqlBuilderTests()
         {
@@ -27,8 +29,14 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Sql.Builders
                 new TableColumn("IsClient", "boolean"),
                 new TableColumn("Phone", "varchar(100)"),
             };
+            _schema = "dbo";
+            _tableName = "tableName";
             _testModule = new PostgreSqlBuilder(_tableColumns);
+            _testModule.SetSchema(_schema);
+            _testModule.SetTableName(_tableName);
         }
+
+        #region Ctor
 
         [Fact]
         public void Ctor_TableColumnsIsEmpty()
@@ -60,14 +68,50 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Sql.Builders
             Assert.Contains(tableColumns, e => e.ColumnName == "IsClient");
             Assert.Contains(tableColumns, e => e.ColumnName == "Phone");
         }
+        
+        #endregion
 
-        [Fact]
-        public void CreateTable_ReturnCorrectSqlStatement()
+        #region Method: BuildCreateTable
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public void BuildCreateTable_ThrowExceptionIfTableSchemaIsNullOrEmpty(string schema)
         {
             // Arrange
-            var tableName = "some-table";
-            var schema = "dbo";
-            var correctSqlStatement = $@"create table ""{schema}"".""{tableName}""(
+            _testModule.SetSchema(schema);
+
+            Action act = () => _testModule.BuildCreateTable();
+            // Act
+            var ex = Record.Exception(act);
+            // Assert
+            Assert.IsType<ArgumentNullException>(ex);
+            Assert.Contains(nameof(_testModule.Schema), ex.Message);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public void BuildCreateTable_ThrowExceptionIfTableNameIsNullOrEmpty(string tableName)
+        {
+            // Arrange
+            _testModule.SetTableName(tableName);
+
+            Action act = () => _testModule.BuildCreateTable();
+            // Act
+            var ex = Record.Exception(act);
+            // Assert
+            Assert.IsType<ArgumentNullException>(ex);
+            Assert.Contains(nameof(_testModule.Table), ex.Message);
+        }
+
+        [Fact]
+        public void BuildCreateTable_ReturnCorrectSqlStatement()
+        {
+            // Arrange
+            var correctSqlStatement = $@"create table ""{_schema}"".""{_tableName}""(
     ""{_tableColumns[0].ColumnName}"" {_tableColumns[0].ColumnType} not null
     , ""{_tableColumns[1].ColumnName}"" {_tableColumns[1].ColumnType} not null
     , ""{_tableColumns[2].ColumnName}"" {_tableColumns[2].ColumnType}
@@ -75,23 +119,61 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Sql.Builders
 );"
                 .Replace("\r\n", "\n");
             // Act
-            var sqlStatement = _testModule.CreateTable(tableName, schema);
+            var sqlStatement = _testModule.BuildCreateTable();
             // Assert
             Assert.Equal(correctSqlStatement, sqlStatement);
         }
 
-        [Fact]
-        public void CreateInsert_ReturnCorrectSqlStatement()
+        #endregion
+
+        #region Method: BuildInsert
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public void BuildInsert_ThrowExceptionIfTableSchemaIsNullOrEmpty(string schema)
         {
             // Arrange
-            var tableName = "some-table";
-            var schema = "dbo";
+            _testModule.SetSchema(schema);
+
+            var jsonItems = "some-json";
+            Action act = () => _testModule.BuildInsert(jsonItems);
+            // Act
+            var ex = Record.Exception(act);
+            // Assert
+            Assert.IsType<ArgumentNullException>(ex);
+            Assert.Contains(nameof(_testModule.Schema), ex.Message);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public void BuildInsert_ThrowExceptionIfTableNameIsNullOrEmpty(string tableName)
+        {
+            // Arrange
+            _testModule.SetTableName(tableName);
+
+            var jsonItems = "some-json";
+            Action act = () => _testModule.BuildInsert(jsonItems);
+            // Act
+            var ex = Record.Exception(act);
+            // Assert
+            Assert.IsType<ArgumentNullException>(ex);
+            Assert.Contains(nameof(_testModule.Table), ex.Message);
+        }
+
+        [Fact]
+        public void BuildInsert_ReturnCorrectSqlStatement()
+        {
+            // Arrange
             var jsonItems = @"[
     {""firstName"": ""James"", ""lastName"": ""Bond"", ""isClient"": false, ""email"": ""james-bond@example.com""},
     {""firstName"": ""John"", ""lastName"": ""Doe"", ""isClient"": true, ""email"": ""john-doe@example.com""}
 ]";
             var correctSqlStatement =
-                    $@"insert into ""{schema}"".""{tableName}"" (
+                $@"insert into ""{_schema}"".""{_tableName}"" (
     ""{_tableColumns[0].ColumnName}""
     , ""{_tableColumns[1].ColumnName}""
     , ""{_tableColumns[2].ColumnName}""
@@ -110,25 +192,23 @@ from json_to_recordset('
     , ""{_tableColumns[2].ColumnName}"" {_tableColumns[2].ColumnType}
     , ""{_tableColumns[3].ColumnName}"" {_tableColumns[3].ColumnType}
 );"
-                .Replace("\r\n", "\n");
+                    .Replace("\r\n", "\n");
             // Act
-            var sqlStatement = _testModule.CreateInsert(tableName, schema, jsonItems);
+            var sqlStatement = _testModule.BuildInsert(jsonItems);
             // Assert
             Assert.Equal(correctSqlStatement, sqlStatement);
         }
 
         [Fact]
-        public void CreateInsert_JsonItemsHasSingleQuote_ReturnCorrectSqlStatementWithDoubleSingleQuotes()
+        public void BuildInsert_JsonItemsHasSingleQuote_ReturnCorrectSqlStatementWithDoubleSingleQuotes()
         {
             // Arrange
-            var tableName = "some-table";
-            var schema = "dbo";
             var jsonItems = @"[
     {""firstName"": ""James 12'/"", ""lastName"": ""Bond"", ""isClient"": false, ""email"": ""james-bond@example.com""},
     { ""firstName"": ""John"", ""lastName"": ""Doe"", ""isClient"": true, ""email"": ""john-doe@example.com"" }
 ]";
             var correctSqlStatement =
-                $@"insert into ""{schema}"".""{tableName}"" (
+                $@"insert into ""{_schema}"".""{_tableName}"" (
     ""{_tableColumns[0].ColumnName}""
     , ""{_tableColumns[1].ColumnName}""
     , ""{_tableColumns[2].ColumnName}""
@@ -149,9 +229,11 @@ from json_to_recordset('
 );"
                     .Replace("\r\n", "\n");
             // Act
-            var sqlStatement = _testModule.CreateInsert(tableName, schema, jsonItems);
+            var sqlStatement = _testModule.BuildInsert(jsonItems);
             // Assert
             Assert.Equal(correctSqlStatement, sqlStatement);
         }
+
+        #endregion
     }
 }

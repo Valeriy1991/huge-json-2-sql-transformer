@@ -1,0 +1,30 @@
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
+using Bogus;
+using HugeJson2SqlTransformer.Transformers;
+using Xunit;
+
+namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
+{
+    [ExcludeFromCodeCoverage]
+    [Trait("Category", "Unit")]
+    public class Json2SqlTransformOptionsTests
+    {
+        private readonly Json2SqlTransformOptions _testModule;
+
+        public Json2SqlTransformOptionsTests()
+        {
+            _testModule = new Json2SqlTransformOptions();
+        }
+
+        [Fact]
+        public void Ctor_NeedSplitAllSqlDeclarationsIsTrue()
+        {
+            // Arrange
+            // Act
+            var needSplitAllSqlDeclarations = _testModule.NeedSplitAllSqlDeclarations;
+            // Assert
+            Assert.True(needSplitAllSqlDeclarations);
+        }
+    }
+}

@@ -11,17 +11,14 @@ namespace HugeJson2SqlTransformer.Transformers
     {
         private readonly IFileReader _jsonFileReader;
         private readonly IFileWriter _fileWriter;
-        private readonly ISqlBuilderDirector _sqlBuilderDirector;
         private readonly ISqlBuilder _sqlBuilder;
 
         public Json2SqlTransformer(IFileReader jsonFileReader,
             IFileWriter fileWriter,
-            ISqlBuilderDirector sqlBuilderDirector,
             ISqlBuilder sqlBuilder)
         {
             _jsonFileReader = jsonFileReader;
             _fileWriter = fileWriter;
-            _sqlBuilderDirector = sqlBuilderDirector;
             _sqlBuilder = sqlBuilder;
         }
 
@@ -36,8 +33,7 @@ namespace HugeJson2SqlTransformer.Transformers
             try
             {
                 var jsonContent = await _jsonFileReader.ReadAllTextAsync(transformOptions.SourceJsonFile);
-                await _sqlBuilderDirector.ChangeBuilder(_sqlBuilder);
-                var sql = await _sqlBuilderDirector.MakeAsync(jsonContent);
+                var sql = CreateSqlStatement(transformOptions, jsonContent);
                 await _fileWriter.WriteAllTextAsync(transformOptions.TargetSqlFile, sql);
                 return Outcomes.Success(sql);
             }
@@ -45,6 +41,18 @@ namespace HugeJson2SqlTransformer.Transformers
             {
                 return Outcomes.Failure().WithMessage(ex.Message);
             }
+        }
+
+        private string CreateSqlStatement(Json2SqlTransformOptions transformOptions, string jsonContent)
+        {
+            _sqlBuilder.SetSchema(transformOptions.TableSchema);
+            _sqlBuilder.SetTableName(transformOptions.TableName);
+
+            var createTableStatement = _sqlBuilder.BuildCreateTable();
+            var insertStatement = _sqlBuilder.BuildInsert(jsonContent);
+
+            var sql = createTableStatement + "\n" + insertStatement;
+            return sql;
         }
     }
 }
