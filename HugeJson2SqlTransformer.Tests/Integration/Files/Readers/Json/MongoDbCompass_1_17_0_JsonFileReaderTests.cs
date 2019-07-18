@@ -24,7 +24,7 @@ namespace HugeJson2SqlTransformer.Tests.Integration.Files.Readers.Json
         public async Task ReadAllTextAsync_FileExists_ReturnCorrectJsonContent()
         {
             // Arrange
-            var existingJsonFilePath = ".\\Integration\\Files\\Readers\\Json\\mongo-db-compass-v1.17.0-json-example.json";
+            var existingJsonFilePath = @".\Integration\Files\Readers\Json\mongo-db-compass-v1.17.0-json-example.json";
             // IDE "MongoDB Compass v.1.17.0" exports collections with specific JSON:
             // - without [ ] for JSON array;
             // - without "," at the end of line;
