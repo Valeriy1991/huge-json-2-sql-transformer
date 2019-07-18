@@ -3,10 +3,10 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Bogus;
-using HugeJson2SqlTransformer.Json;
+using HugeJson2SqlTransformer.Files.Readers.Json;
 using Xunit;
 
-namespace HugeJson2SqlTransformer.Tests.Integration.Json
+namespace HugeJson2SqlTransformer.Tests.Integration.Files.Readers.Json
 {
     [ExcludeFromCodeCoverage]
     [Trait("Category", "Integration")]
@@ -24,7 +24,7 @@ namespace HugeJson2SqlTransformer.Tests.Integration.Json
         public async Task ReadAllTextAsync_FileExists_ReturnCorrectJsonContent()
         {
             // Arrange
-            var existingJsonFilePath = ".\\Integration\\Json\\mongo-db-compass-v1.17.0-json-example.json";
+            var existingJsonFilePath = ".\\Integration\\Files\\Readers\\Json\\mongo-db-compass-v1.17.0-json-example.json";
             // IDE "MongoDB Compass v.1.17.0" exports collections with specific JSON:
             // - without [ ] for JSON array;
             // - without "," at the end of line;

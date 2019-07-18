@@ -2,10 +2,10 @@
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading.Tasks;
-using HugeJson2SqlTransformer.Json;
+using HugeJson2SqlTransformer.Files.Readers.Json;
 using Xunit;
 
-namespace HugeJson2SqlTransformer.Tests.Integration.Json
+namespace HugeJson2SqlTransformer.Tests.Integration.Files.Readers.Json
 {
     [ExcludeFromCodeCoverage]
     [Trait("Category", "Integration")]
@@ -34,7 +34,7 @@ namespace HugeJson2SqlTransformer.Tests.Integration.Json
         public async Task ReadAllTextAsync_JsonFileExists_ReturnJsonContent()
         {
             // Arrange
-            var existingJsonFilePath = ".\\Integration\\Json\\json-example.json";
+            var existingJsonFilePath = ".\\Integration\\Files\\Readers\\Json\\json-example.json";
             var correctJsonContent = await File.ReadAllTextAsync(existingJsonFilePath);
             // Act
             var jsonContent = await _testModule.ReadAllTextAsync(existingJsonFilePath);

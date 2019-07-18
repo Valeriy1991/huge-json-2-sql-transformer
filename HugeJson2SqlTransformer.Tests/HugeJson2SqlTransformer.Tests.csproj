@@ -20,10 +20,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Integration\Json\mongo-db-compass-v1.17.0-json-example.json">
+    <None Update="Integration\Files\Readers\Json\mongo-db-compass-v1.17.0-json-example.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Integration\Json\json-example.json">
+    <None Update="Integration\Files\Readers\Json\json-example.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

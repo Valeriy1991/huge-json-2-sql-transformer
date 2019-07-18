@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Bogus;
 using Ether.Outcomes;
-using HugeJson2SqlTransformer.Json.Abstract;
+using HugeJson2SqlTransformer.Files.Abstract;
 using HugeJson2SqlTransformer.Sql.Abstract;
 using HugeJson2SqlTransformer.Transformers;
 using NSubstitute;
@@ -18,17 +18,16 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
     {
         private readonly Faker _faker = new Faker();
         private readonly Json2SqlTransformer _testModule;
-        private readonly IJsonFileReader _jsonFileReader;
+        private readonly IFileReader _jsonFileReader;
         private readonly string _jsonFilePath;
         private readonly ISqlBuilderDirector _sqlBuilderDirector;
         private readonly string _validJsonContent;
         private readonly ISqlBuilder _sqlBuilder;
-        private readonly string _jsonSchema;
+        private readonly IFileWriter _sqlFileWriter;
 
         public Json2SqlTransformerTests()
         {
             _jsonFilePath = "some-file.json";
-            _jsonSchema = "some-json-schema";
 
             _validJsonContent = @"
 [
@@ -46,12 +45,13 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
     }
 ]
 ";
-            _jsonFileReader = Substitute.For<IJsonFileReader>();
+            _jsonFileReader = Substitute.For<IFileReader>();
             _jsonFileReader.ReadAllTextAsync(_jsonFilePath).Returns(_validJsonContent);
 
             _sqlBuilder = Substitute.For<ISqlBuilder>();
             _sqlBuilderDirector = Substitute.For<ISqlBuilderDirector>();
-            _testModule = new Json2SqlTransformer(_jsonFileReader, _sqlBuilderDirector, _sqlBuilder);
+            _sqlFileWriter = Substitute.For<IFileWriter>();
+            _testModule = new Json2SqlTransformer(_jsonFileReader, _sqlFileWriter, _sqlBuilderDirector, _sqlBuilder);
         }
 
         [Theory]
@@ -122,7 +122,7 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
         }
 
         [Fact]
-        public async Task ExecuteAsync_JsonFileHasValidContent_ReturnSuccessWithSqlAsValue()
+        public async Task ExecuteAsync_JsonFileHasValidContent_ReturnSuccess()
         {
             // Arrange
             var correctSql = "some SQL statements";
@@ -131,7 +131,18 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
             var transformResult = await _testModule.ExecuteAsync(_jsonFilePath);
             // Assert
             Assert.True(transformResult.Success);
-            Assert.Equal(correctSql, transformResult.Value);
+        }
+
+        [Fact]
+        public async Task ExecuteAsync_JsonFileHasValidContent_SqlStatementWasWroteToFileSuccessfully()
+        {
+            // Arrange
+            var correctSql = "some SQL statements";
+            _sqlBuilderDirector.MakeAsync(_validJsonContent).Returns(correctSql);
+            // Act
+            await _testModule.ExecuteAsync(_jsonFilePath);
+            // Assert
+            await _sqlFileWriter.Received(1).WriteAllTextAsync(correctSql);
         }
     }
 }

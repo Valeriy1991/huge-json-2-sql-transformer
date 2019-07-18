@@ -1,11 +1,11 @@
 ﻿using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using HugeJson2SqlTransformer.Json.Abstract;
+using HugeJson2SqlTransformer.Files.Abstract;
 
-namespace HugeJson2SqlTransformer.Json
+namespace HugeJson2SqlTransformer.Files.Readers.Json
 {
-    public class MongoDbCompass_1_17_0_JsonFileReader : IJsonFileReader
+    public class MongoDbCompass_1_17_0_JsonFileReader : IFileReader
     {
         public async Task<string> ReadAllTextAsync(string jsonFilePath)
         {

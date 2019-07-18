@@ -5,6 +5,6 @@ namespace HugeJson2SqlTransformer.Transformers.Abstract
 {
     public interface IJson2SqlTransformer
     {
-        Task<IOutcome<string>> ExecuteAsync(string jsonFilePath);
+        Task<IOutcome> ExecuteAsync(string sourceJsonFilePath);
     }
 }
