@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using Bogus;
 using HugeJson2SqlTransformer.Files.Writers;
 using Xunit;
 
@@ -13,7 +12,6 @@ namespace HugeJson2SqlTransformer.Tests.Integration.Files.Writers
     [Trait("Category", "Integration")]
     public class FileWriterTests : IDisposable
     {
-        private readonly Faker _faker = new Faker();
         private readonly FileWriter _testModule;
         private readonly string _path;
 
@@ -24,22 +22,42 @@ namespace HugeJson2SqlTransformer.Tests.Integration.Files.Writers
         }
 
         [Fact]
-        public async Task WriteAllTextAsync_FileCreatedAfterWritingFinished()
+        public async Task WriteAllTextAsync_EncodingIsDefault_FileCreatedSuccessfullyWithUTF8Encoding()
         {
             // Arrange
-            string content = "Some file content";
+            var content = "Some file content";
             // Act
             await _testModule.WriteAllTextAsync(_path, content);
             // Assert
             Assert.True(File.Exists(_path));
+            var createdFileEncoding = GetEncodingOfFile(_path);
+            Assert.Equal(Encoding.UTF8, createdFileEncoding);
+        }
+
+        [Fact]
+        public async Task WriteAllTextAsync_EncodingWasSetAsParameter_FileCreatedSuccessfullyWithCorrectEncoding()
+        {
+            // Arrange
+            var content = "Some file content";
+            var encoding = Encoding.Unicode;
+            // Act
+            await _testModule.WriteAllTextAsync(_path, content, encoding);
+            // Assert
+            Assert.True(File.Exists(_path));
+            var createdFileEncoding = GetEncodingOfFile(_path);
+            Assert.Equal(encoding, createdFileEncoding);
+        }
+
+        private Encoding GetEncodingOfFile(string filePath)
+        {
             Encoding createdFileEncoding;
-            using (var reader = new StreamReader(_path))
+            using (var reader = new StreamReader(filePath))
             {
                 reader.Peek();
                 createdFileEncoding = reader.CurrentEncoding;
             }
 
-            Assert.Equal(Encoding.UTF8, createdFileEncoding);
+            return createdFileEncoding;
         }
 
         public void Dispose()
