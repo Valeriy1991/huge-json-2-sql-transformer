@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Ether.Outcomes;
 using HugeJson2SqlTransformer.Files.Abstract;
@@ -31,6 +33,7 @@ namespace HugeJson2SqlTransformer.Transformers
 
             try
             {
+                ThrowIfAnyFilesAlreadyExistsInDirectory(transformOptions);
                 InitSqlBuilder(transformOptions);
 
                 var jsonContent = await ReadJsonFile(transformOptions);
@@ -43,6 +46,12 @@ namespace HugeJson2SqlTransformer.Transformers
             {
                 return Outcomes.Failure().WithMessage(ex.Message);
             }
+        }
+
+        private void ThrowIfAnyFilesAlreadyExistsInDirectory(Json2SqlTransformOptions transformOptions)
+        {
+            var directoryForSqlFiles = GenerateSqlDirectoryPath(transformOptions);
+            _fileWriter.ThrowIfAnyFilesAlreadyExistsInDirectory(directoryForSqlFiles);
         }
 
         private Task<string> ReadJsonFile(Json2SqlTransformOptions transformOptions)
@@ -73,12 +82,30 @@ namespace HugeJson2SqlTransformer.Transformers
 
         private Task CreateFileWithInsertSqlStatements(Json2SqlTransformOptions transformOptions, string jsonContent)
         {
-            var sqlTablePath = $"{transformOptions.TableSchema}_{transformOptions.TableName}";
-            var targetSqlFileName = $"002-insert-values-into-{sqlTablePath}.sql";
-            var targetSqlFilePath = Path.Combine(GenerateSqlDirectoryPath(transformOptions), targetSqlFileName);
+            var tasks = new List<Task>();
 
-            var insertStatement = _sqlBuilder.BuildInsert(jsonContent);
-            return _fileWriter.WriteAllTextAsync(targetSqlFilePath, insertStatement);
+            var rgx1JsonItem = new Regex(@"\{[^\}]+\}");
+            var jsonItemsMatches = rgx1JsonItem.Matches(jsonContent);
+            var jsonItemsCount = jsonItemsMatches.Count;
+
+            int filesForCreatingCount = jsonItemsCount / transformOptions.MaxLinesPer1InsertValuesSqlFile ?? 1;
+
+            var fileNumberOffset = 2;
+            var sqlTablePath = $"{transformOptions.TableSchema}_{transformOptions.TableName}";
+
+            for (int i = 0; i < filesForCreatingCount; i++)
+            {
+                var targetSqlFileNameNumberPrefix = $"{(i + fileNumberOffset):000}";
+                var targetSqlFileNameNumberSuffix = filesForCreatingCount > 1 ? $"-{(i + 1):000}" : "";
+                var targetSqlFileName =
+                    $"{targetSqlFileNameNumberPrefix}-insert-values-into-{sqlTablePath}{targetSqlFileNameNumberSuffix}.sql";
+                var targetSqlFilePath = Path.Combine(GenerateSqlDirectoryPath(transformOptions), targetSqlFileName);
+
+                var insertStatement = _sqlBuilder.BuildInsert(jsonContent);
+                tasks.Add(_fileWriter.WriteAllTextAsync(targetSqlFilePath, insertStatement));
+            }
+
+            return Task.WhenAll(tasks);
         }
     }
 }

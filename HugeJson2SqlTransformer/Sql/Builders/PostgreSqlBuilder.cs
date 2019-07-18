@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using HugeJson2SqlTransformer.Sql.Abstract;
 using HugeJson2SqlTransformer.Sql.TableDefinition;
 
@@ -69,7 +70,7 @@ namespace HugeJson2SqlTransformer.Sql.Builders
             return stringBuilder.ToString();
         }
 
-        public string BuildInsert(string jsonItems)
+        public string BuildInsert(string jsonItems, int? skip = null, int? limit = null)
         {
             ThrowExceptionIfTableSchemaOrNameIsIncorrect();
 
@@ -80,7 +81,7 @@ namespace HugeJson2SqlTransformer.Sql.Builders
             stringBuilder.Append("\nselect");
             stringBuilder.Append(CreateTableColumnsDefinition(onlyColumnNames: true));
             stringBuilder.Append("\nfrom json_to_recordset('\n");
-            stringBuilder.Append(ClearJsonItemsForPostgre(jsonItems));
+            stringBuilder.Append(ClearJsonItemsForPostgre(jsonItems, skip, limit));
             stringBuilder.Append("\n') as x(");
             stringBuilder.Append(CreateTableColumnsDefinition());
             stringBuilder.Append("\n);");
@@ -97,8 +98,31 @@ namespace HugeJson2SqlTransformer.Sql.Builders
             Table = table;
         }
 
-        private string ClearJsonItemsForPostgre(string jsonItems)
+        private string ClearJsonItemsForPostgre(string jsonItems, int? skip, int? limit)
         {
+            var rgx1JsonItem = new Regex(@"\{[^\}]+\}");
+            var jsonItemsMatches = rgx1JsonItem.Matches(jsonItems);
+            var jsonItemsCount = jsonItemsMatches.Count;
+            /*
+            var list = new List<string>();
+            for (int i = 0; i < jsonItemsCount; i++)
+            {
+                if (skip != null && i < skip.Value)
+                {
+                    continue;
+                }
+
+                if (limit != null && i > limit.Value)
+                {
+                    continue;
+                }
+
+                var match = jsonItemsMatches[i];
+                var jsonItem = match.Value;
+                list.Add(jsonItem);
+            }
+            */
+
             return jsonItems
                     ?.Replace("\r\n", "\n")
                     ?.Replace("'", "''")

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using Bogus;
 using Ether.Outcomes;
@@ -66,7 +67,8 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
         [InlineData(null)]
         [InlineData("")]
         [InlineData(" ")]
-        public async Task ExecuteAsync_SourceJsonFilePathIsNullOrEmpty_ReturnFailureWithCorrectMessage(string sourceJsonFilePath)
+        public async Task ExecuteAsync_SourceJsonFilePathIsNullOrEmpty_ReturnFailureWithCorrectMessage(
+            string sourceJsonFilePath)
         {
             // Arrange
             _transformOptions.SourceJsonFilePath = sourceJsonFilePath;
@@ -144,7 +146,7 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
             // Assert
             Assert.True(transformResult.Success);
         }
-        
+
         [Fact]
         public async Task ExecuteAsync_JsonFileHasValidContent_DatabaseSchemaWasSetUpForSqlBuilder()
         {
@@ -194,14 +196,59 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
         public async Task ExecuteAsync_FileWithSqlStatementOfInsertValuesWasCreated()
         {
             // Arrange
-            var correctFileName = $"002-insert-values-into-{_transformOptions.TableSchema}_{_transformOptions.TableName}.sql";
+            var correctFileName =
+                $"002-insert-values-into-{_transformOptions.TableSchema}_{_transformOptions.TableName}.sql";
             var correctFilePath = Path.Combine(_sourceDirectory, _sourceJsonFileName, correctFileName);
-            var correctInsertValuesSqlStatement = "create table SQL statement";
+            var correctInsertValuesSqlStatement = "insert values SQL statement";
             _sqlBuilder.BuildInsert(_validJsonContent).Returns(correctInsertValuesSqlStatement);
             // Act
             await _testModule.ExecuteAsync(_transformOptions);
             // Assert
             await _fileWriter.Received(1).WriteAllTextAsync(correctFilePath, correctInsertValuesSqlStatement);
+        }
+
+        [Fact]
+        public async Task
+            ExecuteAsync_SetMaxLinesPer1InsertValuesSqlFile_FileWithSqlStatementOfInsertValuesWasCreatedCorrectTimes()
+        {
+            // Arrange
+            var maxLinesPer1InsertValuesSqlFile = 2;
+            var jsonItemsCount = 7;
+            var jsonContent = GenerateJsonObjects(jsonItemsCount);
+            _fileReader.ReadAllTextAsync(_transformOptions.SourceJsonFilePath).Returns(jsonContent);
+            var correctInsertSqlStatement = "some insert values";
+            _sqlBuilder.BuildInsert(jsonContent).Returns(correctInsertSqlStatement);
+
+            _transformOptions.MaxLinesPer1InsertValuesSqlFile = maxLinesPer1InsertValuesSqlFile;
+            var correctInsertValuesSqlFilesCount = jsonItemsCount / maxLinesPer1InsertValuesSqlFile;
+            // Act
+            await _testModule.ExecuteAsync(_transformOptions);
+            // Assert
+            await _fileWriter.Received(correctInsertValuesSqlFilesCount)
+                .WriteAllTextAsync(Arg.Any<string>(), correctInsertSqlStatement);
+        }
+
+        private string GenerateJsonObjects(int count)
+        {
+            var stringBuilder = new StringBuilder();
+            for (int i = 0; i < count; i++)
+            {
+                stringBuilder.Append(GenerateJsonObject());
+                if (i < (count - 1))
+                    stringBuilder.Append(",\n");
+            }
+
+            return stringBuilder.ToString();
+        }
+
+        private string GenerateJsonObject()
+        {
+            return $@"{{
+	""firstName"": ""{_faker.Person.FirstName}"",
+    ""lastName"": ""{_faker.Person.LastName}"",
+    ""isClient"": {_faker.Random.Bool()},
+    ""email"": ""{_faker.Person.Email}""
+}}";
         }
     }
 }
