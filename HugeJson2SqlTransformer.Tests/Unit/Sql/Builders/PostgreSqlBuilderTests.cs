@@ -87,18 +87,8 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Sql.Builders
             var tableName = "some-table";
             var schema = "dbo";
             var jsonItems = @"[
-    {
-	    ""firstName"": ""James"",
-        ""lastName"": ""Bond"",
-        ""isClient"": false,
-        ""email"": ""james-bond@example.com""
-    },
-    {
-	    ""firstName"": ""John"",
-        ""lastName"": ""Doe"",
-        ""isClient"": true,
-        ""email"": ""john-doe@example.com""
-    }
+    {""firstName"": ""James"", ""lastName"": ""Bond"", ""isClient"": false, ""email"": ""james-bond@example.com""},
+    {""firstName"": ""John"", ""lastName"": ""Doe"", ""isClient"": true, ""email"": ""john-doe@example.com""}
 ]";
             var correctSqlStatement =
                     $@"insert into ""{schema}"".""{tableName}"" (
@@ -121,6 +111,43 @@ from json_to_recordset('
     , ""{_tableColumns[3].ColumnName}"" {_tableColumns[3].ColumnType}
 );"
                 .Replace("\r\n", "\n");
+            // Act
+            var sqlStatement = _testModule.CreateInsert(tableName, schema, jsonItems);
+            // Assert
+            Assert.Equal(correctSqlStatement, sqlStatement);
+        }
+
+        [Fact]
+        public void CreateInsert_JsonItemsHasSingleQuote_ReturnCorrectSqlStatementWithDoubleSingleQuotes()
+        {
+            // Arrange
+            var tableName = "some-table";
+            var schema = "dbo";
+            var jsonItems = @"[
+    {""firstName"": ""James 12'/"", ""lastName"": ""Bond"", ""isClient"": false, ""email"": ""james-bond@example.com""},
+    { ""firstName"": ""John"", ""lastName"": ""Doe"", ""isClient"": true, ""email"": ""john-doe@example.com"" }
+]";
+            var correctSqlStatement =
+                $@"insert into ""{schema}"".""{tableName}"" (
+    ""{_tableColumns[0].ColumnName}""
+    , ""{_tableColumns[1].ColumnName}""
+    , ""{_tableColumns[2].ColumnName}""
+    , ""{_tableColumns[3].ColumnName}""
+)
+select
+    ""{_tableColumns[0].ColumnName}""
+    , ""{_tableColumns[1].ColumnName}""
+    , ""{_tableColumns[2].ColumnName}""
+    , ""{_tableColumns[3].ColumnName}""
+from json_to_recordset('
+{jsonItems.Replace("'", "''")}
+') as x(
+    ""{_tableColumns[0].ColumnName}"" {_tableColumns[0].ColumnType} not null
+    , ""{_tableColumns[1].ColumnName}"" {_tableColumns[1].ColumnType} not null
+    , ""{_tableColumns[2].ColumnName}"" {_tableColumns[2].ColumnType}
+    , ""{_tableColumns[3].ColumnName}"" {_tableColumns[3].ColumnType}
+);"
+                    .Replace("\r\n", "\n");
             // Act
             var sqlStatement = _testModule.CreateInsert(tableName, schema, jsonItems);
             // Assert

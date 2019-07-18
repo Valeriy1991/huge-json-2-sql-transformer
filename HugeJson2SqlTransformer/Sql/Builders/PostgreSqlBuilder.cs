@@ -62,11 +62,19 @@ namespace HugeJson2SqlTransformer.Sql.Builders
             stringBuilder.Append("\nselect");
             stringBuilder.Append(CreateTableColumnsDefinition(onlyColumnNames: true));
             stringBuilder.Append("\nfrom json_to_recordset('\n");
-            stringBuilder.Append(jsonItems?.Replace("\r\n", "\n"));
+            stringBuilder.Append(ClearJsonItemsForPostgre(jsonItems));
             stringBuilder.Append("\n') as x(");
             stringBuilder.Append(CreateTableColumnsDefinition());
             stringBuilder.Append("\n);");
             return stringBuilder.ToString();
+        }
+
+        private string ClearJsonItemsForPostgre(string jsonItems)
+        {
+            return jsonItems
+                    ?.Replace("\r\n", "\n")
+                    ?.Replace("'", "''")
+                ;
         }
     }
 }
