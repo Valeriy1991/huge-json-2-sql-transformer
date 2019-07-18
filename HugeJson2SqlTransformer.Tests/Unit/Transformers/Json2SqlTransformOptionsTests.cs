@@ -26,5 +26,17 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
             // Assert
             Assert.True(needSplitAllSqlDeclarations);
         }
+
+        [Fact]
+        public void SourceJsonFileName_ReturnOnlyFileNameWithoutExtension()
+        {
+            // Arrange
+            _testModule.SourceJsonFilePath = @"D:\Files\example.json";
+            var correctSourceJsonFileName = "example";
+            // Act
+            var sourceJsonFileName = _testModule.SourceJsonFileName;
+            // Assert
+            Assert.Equal(correctSourceJsonFileName, sourceJsonFileName);
+        }
     }
 }

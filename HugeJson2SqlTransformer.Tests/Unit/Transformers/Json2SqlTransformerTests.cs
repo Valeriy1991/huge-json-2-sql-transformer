@@ -20,7 +20,6 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
         private readonly Json2SqlTransformer _testModule;
         private readonly IFileReader _fileReader;
         private readonly string _sourceJsonFileName;
-        private readonly string _targetSqlFileName;
         private readonly Json2SqlTransformOptions _transformOptions;
         private readonly string _validJsonContent;
         private readonly ISqlBuilder _sqlBuilder;
@@ -29,11 +28,9 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
         public Json2SqlTransformerTests()
         {
             _sourceJsonFileName = "some-file";
-            _targetSqlFileName = "target-sql";
             _transformOptions = new Json2SqlTransformOptions()
             {
-                SourceJsonFile = _sourceJsonFileName,
-                TargetSqlFile = _targetSqlFileName
+                SourceJsonFilePath = _sourceJsonFileName,
             };
 
             _validJsonContent = @"
@@ -67,27 +64,12 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
         public async Task ExecuteAsync_SourceJsonFilePathIsNullOrEmpty_ReturnFailureWithCorrectMessage(string sourceJsonFilePath)
         {
             // Arrange
-            _transformOptions.SourceJsonFile = sourceJsonFilePath;
+            _transformOptions.SourceJsonFilePath = sourceJsonFilePath;
             // Act
             var transformResult = await _testModule.ExecuteAsync(_transformOptions);
             // Assert
             Assert.True(transformResult.Failure);
             Assert.Equal("Source file path is incorrect", transformResult.ToString());
-        }
-
-        [Theory]
-        [InlineData(null)]
-        [InlineData("")]
-        [InlineData(" ")]
-        public async Task ExecuteAsync_TargetSqlFilePathIsNullOrEmpty_ReturnFailureWithCorrectMessage(string targetSqlFilePath)
-        {
-            // Arrange
-            _transformOptions.TargetSqlFile = targetSqlFilePath;
-            // Act
-            var transformResult = await _testModule.ExecuteAsync(_transformOptions);
-            // Assert
-            Assert.True(transformResult.Failure);
-            Assert.Equal("Target file path is incorrect", transformResult.ToString());
         }
 
         [Fact]
@@ -194,7 +176,7 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
         public async Task ExecuteAsync_FileWithSqlStatementOfCreateTableWasCreated()
         {
             // Arrange
-            var correctFilePath = $"001-{_transformOptions.TargetSqlFile}-create-table.sql";
+            var correctFilePath = $"001-{_sourceJsonFileName}-create-table.sql";
             var correctCreateTableSqlStatement = "create table SQL statement";
             _sqlBuilder.BuildCreateTable().Returns(correctCreateTableSqlStatement);
             // Act
@@ -207,7 +189,7 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
         public async Task ExecuteAsync_FileWithSqlStatementOfInsertValuesWasCreated()
         {
             // Arrange
-            var correctFilePath = $"002-{_transformOptions.TargetSqlFile}-insert-values.sql";
+            var correctFilePath = $"002-{_sourceJsonFileName}-insert-values.sql";
             var correctInsertValuesSqlStatement = "create table SQL statement";
             _sqlBuilder.BuildInsert(_validJsonContent).Returns(correctInsertValuesSqlStatement);
             // Act

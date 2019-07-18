@@ -25,10 +25,8 @@ namespace HugeJson2SqlTransformer.Transformers
 
         public async Task<IOutcome> ExecuteAsync(Json2SqlTransformOptions transformOptions)
         {
-            if (string.IsNullOrWhiteSpace(transformOptions.SourceJsonFile))
+            if (string.IsNullOrWhiteSpace(transformOptions.SourceJsonFilePath))
                 return Outcomes.Failure().WithMessage("Source file path is incorrect");
-            if (string.IsNullOrWhiteSpace(transformOptions.TargetSqlFile))
-                return Outcomes.Failure().WithMessage("Target file path is incorrect");
 
             try
             {
@@ -48,7 +46,7 @@ namespace HugeJson2SqlTransformer.Transformers
 
         private Task<string> ReadJsonFile(Json2SqlTransformOptions transformOptions)
         {
-            var jsonFilePath = $"{transformOptions.SourceJsonFile}.json";
+            var jsonFilePath = $"{transformOptions.SourceJsonFilePath}.json";
             return _fileReader.ReadAllTextAsync(jsonFilePath);
         }
 
@@ -60,7 +58,7 @@ namespace HugeJson2SqlTransformer.Transformers
 
         private Task CreateFileWithCreateTableSqlStatement(Json2SqlTransformOptions transformOptions)
         {
-            var targetSqlFilePath = $"001-{transformOptions.TargetSqlFile}-create-table.sql";
+            var targetSqlFilePath = $"001-{transformOptions.SourceJsonFileName}-create-table.sql";
 
             var createTableStatement = _sqlBuilder.BuildCreateTable();
             return _fileWriter.WriteAllTextAsync(targetSqlFilePath, createTableStatement);
@@ -68,7 +66,7 @@ namespace HugeJson2SqlTransformer.Transformers
 
         private Task CreateFileWithInsertSqlStatements(Json2SqlTransformOptions transformOptions, string jsonContent)
         {
-            var targetSqlFilePath = $"002-{transformOptions.TargetSqlFile}-insert-values.sql";
+            var targetSqlFilePath = $"002-{transformOptions.SourceJsonFileName}-insert-values.sql";
             var insertStatement = _sqlBuilder.BuildInsert(jsonContent);
             return _fileWriter.WriteAllTextAsync(targetSqlFilePath, insertStatement);
         }

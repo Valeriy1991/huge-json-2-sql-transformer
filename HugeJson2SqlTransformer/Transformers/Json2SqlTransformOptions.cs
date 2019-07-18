@@ -1,9 +1,16 @@
-﻿namespace HugeJson2SqlTransformer.Transformers
+﻿using System.IO;
+
+namespace HugeJson2SqlTransformer.Transformers
 {
     public class Json2SqlTransformOptions
     {
-        public string SourceJsonFile { get; set; }
-        public string TargetSqlFile { get; set; }
+        /// <summary>
+        /// Full path to JSON file
+        /// </summary>
+        public string SourceJsonFilePath { get; set; }
+
+        internal string SourceJsonFileName => Path.GetFileNameWithoutExtension(SourceJsonFilePath);
+
         public bool NeedSplitAllSqlDeclarations { get; set; } = true;
         public int? InsertSplitLines { get; set; }
 
