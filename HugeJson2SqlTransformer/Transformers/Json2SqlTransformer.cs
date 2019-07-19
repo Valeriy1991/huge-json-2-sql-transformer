@@ -85,7 +85,6 @@ namespace HugeJson2SqlTransformer.Transformers
             var tasks = new List<Task>();
 
             var rgx1JsonItem = new Regex(@"\}(?=(,)?(\r\n|\n))");
-            //var rgx1JsonItem = new Regex(@"\{[^\}]+\}");
             var jsonItemsMatches = rgx1JsonItem.Matches(jsonContent);
             var jsonItemsCount = jsonItemsMatches.Count;
 
