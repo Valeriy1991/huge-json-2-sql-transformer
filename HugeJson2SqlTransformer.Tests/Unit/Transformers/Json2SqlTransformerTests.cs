@@ -5,8 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Bogus;
 using Ether.Outcomes;
+using HugeJson2SqlTransformer.Extensions;
 using HugeJson2SqlTransformer.Files.Abstract;
 using HugeJson2SqlTransformer.Sql.Abstract;
+using HugeJson2SqlTransformer.Tests.Unit.Fake;
 using HugeJson2SqlTransformer.Transformers;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
@@ -207,20 +209,23 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
             await _fileWriter.Received(1).WriteAllTextAsync(correctFilePath, correctInsertValuesSqlStatement);
         }
 
-        [Fact]
+        [Theory]
+        [InlineData(2, 7, 4)]
+        [InlineData(2, 8, 4)]
+        [InlineData(2, 3, 2)]
+        [InlineData(2, 1, 1)]
         public async Task
-            ExecuteAsync_SetMaxLinesPer1InsertValuesSqlFile_FileWithSqlStatementOfInsertValuesWasCreatedCorrectTimes()
+            ExecuteAsync_SetMaxLinesPer1InsertValuesSqlFile_FileWithSqlStatementOfInsertValuesWasCreatedCorrectTimes(
+                int maxLinesPer1InsertValuesSqlFile, int jsonItemsCount, int correctInsertValuesSqlFilesCount)
         {
             // Arrange
-            var maxLinesPer1InsertValuesSqlFile = 2;
-            var jsonItemsCount = 7;
-            var jsonContent = GenerateJsonObjects(jsonItemsCount);
+            var jsonContent = FakeJson.CreateMultiple(jsonItemsCount).AsJsonString();
             _fileReader.ReadAllTextAsync(_transformOptions.SourceJsonFilePath).Returns(jsonContent);
             var correctInsertSqlStatement = "some insert values";
-            _sqlBuilder.BuildInsert(jsonContent).Returns(correctInsertSqlStatement);
+            _sqlBuilder.BuildInsert(jsonContent, Arg.Any<int>(), Arg.Any<int>())
+                .Returns(correctInsertSqlStatement);
 
             _transformOptions.MaxLinesPer1InsertValuesSqlFile = maxLinesPer1InsertValuesSqlFile;
-            var correctInsertValuesSqlFilesCount = jsonItemsCount / maxLinesPer1InsertValuesSqlFile;
             // Act
             await _testModule.ExecuteAsync(_transformOptions);
             // Assert
@@ -228,27 +233,24 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
                 .WriteAllTextAsync(Arg.Any<string>(), correctInsertSqlStatement);
         }
 
-        private string GenerateJsonObjects(int count)
+        [Fact]
+        public async Task
+            ExecuteAsync_SetMaxLinesPer1InsertValuesSqlFile_SqlStatementOfInsertValuesWasCreatedCorrectTimes()
         {
-            var stringBuilder = new StringBuilder();
-            for (int i = 0; i < count; i++)
-            {
-                stringBuilder.Append(GenerateJsonObject());
-                if (i < (count - 1))
-                    stringBuilder.Append(",\n");
-            }
+            // Arrange
+            var maxLinesPer1InsertValuesSqlFile = 2;
+            var jsonItemsCount = 7;
+            var jsonContent = FakeJson.CreateMultiple(jsonItemsCount).AsJsonString();
+            _fileReader.ReadAllTextAsync(_transformOptions.SourceJsonFilePath).Returns(jsonContent);
 
-            return stringBuilder.ToString();
-        }
-
-        private string GenerateJsonObject()
-        {
-            return $@"{{
-	""firstName"": ""{_faker.Person.FirstName}"",
-    ""lastName"": ""{_faker.Person.LastName}"",
-    ""isClient"": {_faker.Random.Bool()},
-    ""email"": ""{_faker.Person.Email}""
-}}";
+            _transformOptions.MaxLinesPer1InsertValuesSqlFile = maxLinesPer1InsertValuesSqlFile;
+            // Act
+            await _testModule.ExecuteAsync(_transformOptions);
+            // Assert
+            _sqlBuilder.Received(1).BuildInsert(jsonContent, skip: 0, limit: maxLinesPer1InsertValuesSqlFile);
+            _sqlBuilder.Received(1).BuildInsert(jsonContent, skip: 2, limit: maxLinesPer1InsertValuesSqlFile);
+            _sqlBuilder.Received(1).BuildInsert(jsonContent, skip: 4, limit: maxLinesPer1InsertValuesSqlFile);
+            _sqlBuilder.Received(1).BuildInsert(jsonContent, skip: 6, limit: maxLinesPer1InsertValuesSqlFile);
         }
     }
 }

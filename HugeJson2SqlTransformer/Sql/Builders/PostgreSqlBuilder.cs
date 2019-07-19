@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using HugeJson2SqlTransformer.Extensions;
 using HugeJson2SqlTransformer.Sql.Abstract;
 using HugeJson2SqlTransformer.Sql.TableDefinition;
 
@@ -101,29 +103,20 @@ namespace HugeJson2SqlTransformer.Sql.Builders
         private string ClearJsonItemsForPostgre(string jsonItems, int? skip, int? limit)
         {
             var rgx1JsonItem = new Regex(@"\{[^\}]+\}");
-            var jsonItemsMatches = rgx1JsonItem.Matches(jsonItems);
-            var jsonItemsCount = jsonItemsMatches.Count;
-            /*
-            var list = new List<string>();
-            for (int i = 0; i < jsonItemsCount; i++)
+            var jsonItemsMatches = rgx1JsonItem.Matches(jsonItems).Select(e => e.Value).ToList();
+            if (skip != null && skip >= 0)
             {
-                if (skip != null && i < skip.Value)
-                {
-                    continue;
-                }
-
-                if (limit != null && i > limit.Value)
-                {
-                    continue;
-                }
-
-                var match = jsonItemsMatches[i];
-                var jsonItem = match.Value;
-                list.Add(jsonItem);
+                jsonItemsMatches = jsonItemsMatches.Skip(skip.Value).ToList();
             }
-            */
+            if (limit != null && limit >= 0)
+            {
+                jsonItemsMatches = jsonItemsMatches.Take(limit.Value).ToList();
+            }
+            
+            var newJsonItems = jsonItemsMatches.AsJsonString();
 
-            return jsonItems
+            return //jsonItems
+                newJsonItems
                     ?.Replace("\r\n", "\n")
                     ?.Replace("'", "''")
                 ;

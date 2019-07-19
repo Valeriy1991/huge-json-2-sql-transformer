@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Bogus;
+using HugeJson2SqlTransformer.Extensions;
 using HugeJson2SqlTransformer.Sql.Builders;
 using HugeJson2SqlTransformer.Sql.TableDefinition;
+using HugeJson2SqlTransformer.Tests.Unit.Fake;
 using Xunit;
 
 namespace HugeJson2SqlTransformer.Tests.Unit.Sql.Builders
@@ -68,7 +71,7 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Sql.Builders
             Assert.Contains(tableColumns, e => e.ColumnName == "IsClient");
             Assert.Contains(tableColumns, e => e.ColumnName == "Phone");
         }
-        
+
         #endregion
 
         #region Method: BuildCreateTable
@@ -168,10 +171,7 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Sql.Builders
         public void BuildInsert_ReturnCorrectSqlStatement()
         {
             // Arrange
-            var jsonItems = @"[
-    {""firstName"": ""James"", ""lastName"": ""Bond"", ""isClient"": false, ""email"": ""james-bond@example.com""},
-    {""firstName"": ""John"", ""lastName"": ""Doe"", ""isClient"": true, ""email"": ""john-doe@example.com""}
-]";
+            var jsonItems = FakeJson.CreateMultiple(2).AsJsonString().FixSingleQuotes();
             var correctSqlStatement =
                 $@"insert into ""{_schema}"".""{_tableName}"" (
     ""{_tableColumns[0].ColumnName}""
@@ -203,10 +203,7 @@ from json_to_recordset('
         public void BuildInsert_JsonItemsHasSingleQuote_ReturnCorrectSqlStatementWithDoubleSingleQuotes()
         {
             // Arrange
-            var jsonItems = @"[
-    {""firstName"": ""James 12'/"", ""lastName"": ""Bond"", ""isClient"": false, ""email"": ""james-bond@example.com""},
-    { ""firstName"": ""John"", ""lastName"": ""Doe"", ""isClient"": true, ""email"": ""john-doe@example.com"" }
-]";
+            var jsonItems = FakeJson.CreateMultiple(2).AsJsonString().FixSingleQuotes();
             var correctSqlStatement =
                 $@"insert into ""{_schema}"".""{_tableName}"" (
     ""{_tableColumns[0].ColumnName}""
@@ -230,6 +227,56 @@ from json_to_recordset('
                     .Replace("\r\n", "\n");
             // Act
             var sqlStatement = _testModule.BuildInsert(jsonItems);
+            // Assert
+            Assert.Equal(correctSqlStatement, sqlStatement);
+        }
+
+        [Theory]
+        [InlineData(20, 0, 2)]
+        [InlineData(20, 2, 5)]
+        [InlineData(20, 16, 4)]
+        public void BuildInsert_SkipAndLimitIsNotNull_ReturnCorrectCountOfJsonItemsInSqlStatement(int total, int skip,
+            int limit)
+        {
+            // Arrange
+            var jsonItems = FakeJson.CreateMultiple(total);
+            var filteredJsonItems = jsonItems.Skip(skip).Take(limit).ToList();
+            var stringBuilder = new StringBuilder();
+            stringBuilder.Append($@"insert into ""{_schema}"".""{_tableName}"" (
+    ""{_tableColumns[0].ColumnName}""
+    , ""{_tableColumns[1].ColumnName}""
+    , ""{_tableColumns[2].ColumnName}""
+    , ""{_tableColumns[3].ColumnName}""
+)
+select
+    ""{_tableColumns[0].ColumnName}""
+    , ""{_tableColumns[1].ColumnName}""
+    , ""{_tableColumns[2].ColumnName}""
+    , ""{_tableColumns[3].ColumnName}""
+from json_to_recordset('
+[
+");
+            for (int i = 0; i < filteredJsonItems.Count; i++)
+            {
+                stringBuilder.Append($"{filteredJsonItems[i].Replace("'", "''")}");
+                if (i < filteredJsonItems.Count - 1)
+                {
+                    stringBuilder.Append(",\n");
+                }
+            }
+
+            stringBuilder.Append($@"
+]
+') as x(
+    ""{_tableColumns[0].ColumnName}"" {_tableColumns[0].ColumnType} not null
+    , ""{_tableColumns[1].ColumnName}"" {_tableColumns[1].ColumnType} not null
+    , ""{_tableColumns[2].ColumnName}"" {_tableColumns[2].ColumnType}
+    , ""{_tableColumns[3].ColumnName}"" {_tableColumns[3].ColumnType}
+);");
+            var correctSqlStatement = stringBuilder.ToString().Replace("\r\n", "\n");
+            var jsonItemsAsString = jsonItems.AsJsonString();
+            // Act
+            var sqlStatement = _testModule.BuildInsert(jsonItemsAsString, skip, limit);
             // Assert
             Assert.Equal(correctSqlStatement, sqlStatement);
         }

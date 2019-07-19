@@ -88,7 +88,8 @@ namespace HugeJson2SqlTransformer.Transformers
             var jsonItemsMatches = rgx1JsonItem.Matches(jsonContent);
             var jsonItemsCount = jsonItemsMatches.Count;
 
-            int filesForCreatingCount = jsonItemsCount / transformOptions.MaxLinesPer1InsertValuesSqlFile ?? 1;
+            var maxLinesPer1InsertValuesSqlFile = transformOptions.MaxLinesPer1InsertValuesSqlFile;
+            int filesForCreatingCount = CalculateNewFilesCount(jsonItemsCount, maxLinesPer1InsertValuesSqlFile);
 
             var fileNumberOffset = 2;
             var sqlTablePath = $"{transformOptions.TableSchema}_{transformOptions.TableName}";
@@ -101,11 +102,24 @@ namespace HugeJson2SqlTransformer.Transformers
                     $"{targetSqlFileNameNumberPrefix}-insert-values-into-{sqlTablePath}{targetSqlFileNameNumberSuffix}.sql";
                 var targetSqlFilePath = Path.Combine(GenerateSqlDirectoryPath(transformOptions), targetSqlFileName);
 
-                var insertStatement = _sqlBuilder.BuildInsert(jsonContent);
+                var skip = i * maxLinesPer1InsertValuesSqlFile;
+                var insertStatement = _sqlBuilder
+                    .BuildInsert(jsonContent, skip: skip, limit: maxLinesPer1InsertValuesSqlFile);
                 tasks.Add(_fileWriter.WriteAllTextAsync(targetSqlFilePath, insertStatement));
             }
 
             return Task.WhenAll(tasks);
+        }
+
+        private int CalculateNewFilesCount(int jsonItemsCount, int? maxLinesPer1InsertValuesSqlFile)
+        {
+            if (maxLinesPer1InsertValuesSqlFile == null)
+                return 1;
+
+            if (jsonItemsCount % maxLinesPer1InsertValuesSqlFile.Value == 0)
+                return jsonItemsCount / maxLinesPer1InsertValuesSqlFile.Value;
+
+            return jsonItemsCount / maxLinesPer1InsertValuesSqlFile.Value + 1;
         }
     }
 }
