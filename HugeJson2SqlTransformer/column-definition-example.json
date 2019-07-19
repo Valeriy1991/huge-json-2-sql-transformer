@@ -1,0 +1,22 @@
+[
+  {
+    "name": "firstName",
+    "type": "text",
+    "required": true
+  },
+  {
+    "name": "lastName",
+    "type": "bool",
+    "required": true
+  },
+  {
+    "name": "email",
+    "type": "text",
+    "required": true
+  },
+  {
+    "name": "phone",
+    "type": "varchar(50)",
+    "required": true
+  }
+]

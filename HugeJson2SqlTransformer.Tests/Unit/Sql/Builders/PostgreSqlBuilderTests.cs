@@ -66,10 +66,10 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Sql.Builders
             // Act
             var tableColumns = testModule.TableColumns;
             // Assert
-            Assert.Contains(tableColumns, e => e.ColumnName == "FirstName");
-            Assert.Contains(tableColumns, e => e.ColumnName == "LastName");
-            Assert.Contains(tableColumns, e => e.ColumnName == "IsClient");
-            Assert.Contains(tableColumns, e => e.ColumnName == "Phone");
+            Assert.Contains(tableColumns, e => e.Name == "FirstName");
+            Assert.Contains(tableColumns, e => e.Name == "LastName");
+            Assert.Contains(tableColumns, e => e.Name == "IsClient");
+            Assert.Contains(tableColumns, e => e.Name == "Phone");
         }
 
         #endregion
@@ -115,10 +115,10 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Sql.Builders
         {
             // Arrange
             var correctSqlStatement = $@"create table ""{_schema}"".""{_tableName}""(
-    ""{_tableColumns[0].ColumnName}"" {_tableColumns[0].ColumnType} not null
-    , ""{_tableColumns[1].ColumnName}"" {_tableColumns[1].ColumnType} not null
-    , ""{_tableColumns[2].ColumnName}"" {_tableColumns[2].ColumnType}
-    , ""{_tableColumns[3].ColumnName}"" {_tableColumns[3].ColumnType}
+    ""{_tableColumns[0].Name}"" {_tableColumns[0].Type} not null
+    , ""{_tableColumns[1].Name}"" {_tableColumns[1].Type} not null
+    , ""{_tableColumns[2].Name}"" {_tableColumns[2].Type}
+    , ""{_tableColumns[3].Name}"" {_tableColumns[3].Type}
 );"
                 .Replace("\r\n", "\n");
             // Act
@@ -174,23 +174,23 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Sql.Builders
             var jsonItems = FakeJson.CreateMultiple(2).AsJsonString().FixSingleQuotes();
             var correctSqlStatement =
                 $@"insert into ""{_schema}"".""{_tableName}"" (
-    ""{_tableColumns[0].ColumnName}""
-    , ""{_tableColumns[1].ColumnName}""
-    , ""{_tableColumns[2].ColumnName}""
-    , ""{_tableColumns[3].ColumnName}""
+    ""{_tableColumns[0].Name}""
+    , ""{_tableColumns[1].Name}""
+    , ""{_tableColumns[2].Name}""
+    , ""{_tableColumns[3].Name}""
 )
 select
-    ""{_tableColumns[0].ColumnName}""
-    , ""{_tableColumns[1].ColumnName}""
-    , ""{_tableColumns[2].ColumnName}""
-    , ""{_tableColumns[3].ColumnName}""
+    ""{_tableColumns[0].Name}""
+    , ""{_tableColumns[1].Name}""
+    , ""{_tableColumns[2].Name}""
+    , ""{_tableColumns[3].Name}""
 from json_to_recordset('
 {jsonItems}
 ') as x(
-    ""{_tableColumns[0].ColumnName}"" {_tableColumns[0].ColumnType} not null
-    , ""{_tableColumns[1].ColumnName}"" {_tableColumns[1].ColumnType} not null
-    , ""{_tableColumns[2].ColumnName}"" {_tableColumns[2].ColumnType}
-    , ""{_tableColumns[3].ColumnName}"" {_tableColumns[3].ColumnType}
+    ""{_tableColumns[0].Name}"" {_tableColumns[0].Type} not null
+    , ""{_tableColumns[1].Name}"" {_tableColumns[1].Type} not null
+    , ""{_tableColumns[2].Name}"" {_tableColumns[2].Type}
+    , ""{_tableColumns[3].Name}"" {_tableColumns[3].Type}
 );"
                     .Replace("\r\n", "\n");
             // Act
@@ -206,23 +206,23 @@ from json_to_recordset('
             var jsonItems = FakeJson.CreateMultiple(2).AsJsonString().FixSingleQuotes();
             var correctSqlStatement =
                 $@"insert into ""{_schema}"".""{_tableName}"" (
-    ""{_tableColumns[0].ColumnName}""
-    , ""{_tableColumns[1].ColumnName}""
-    , ""{_tableColumns[2].ColumnName}""
-    , ""{_tableColumns[3].ColumnName}""
+    ""{_tableColumns[0].Name}""
+    , ""{_tableColumns[1].Name}""
+    , ""{_tableColumns[2].Name}""
+    , ""{_tableColumns[3].Name}""
 )
 select
-    ""{_tableColumns[0].ColumnName}""
-    , ""{_tableColumns[1].ColumnName}""
-    , ""{_tableColumns[2].ColumnName}""
-    , ""{_tableColumns[3].ColumnName}""
+    ""{_tableColumns[0].Name}""
+    , ""{_tableColumns[1].Name}""
+    , ""{_tableColumns[2].Name}""
+    , ""{_tableColumns[3].Name}""
 from json_to_recordset('
 {jsonItems.Replace("'", "''")}
 ') as x(
-    ""{_tableColumns[0].ColumnName}"" {_tableColumns[0].ColumnType} not null
-    , ""{_tableColumns[1].ColumnName}"" {_tableColumns[1].ColumnType} not null
-    , ""{_tableColumns[2].ColumnName}"" {_tableColumns[2].ColumnType}
-    , ""{_tableColumns[3].ColumnName}"" {_tableColumns[3].ColumnType}
+    ""{_tableColumns[0].Name}"" {_tableColumns[0].Type} not null
+    , ""{_tableColumns[1].Name}"" {_tableColumns[1].Type} not null
+    , ""{_tableColumns[2].Name}"" {_tableColumns[2].Type}
+    , ""{_tableColumns[3].Name}"" {_tableColumns[3].Type}
 );"
                     .Replace("\r\n", "\n");
             // Act
@@ -251,16 +251,16 @@ from json_to_recordset('
 
             var stringBuilder = new StringBuilder();
             stringBuilder.Append($@"insert into ""{_schema}"".""{_tableName}"" (
-    ""{_tableColumns[0].ColumnName}""
-    , ""{_tableColumns[1].ColumnName}""
-    , ""{_tableColumns[2].ColumnName}""
-    , ""{_tableColumns[3].ColumnName}""
+    ""{_tableColumns[0].Name}""
+    , ""{_tableColumns[1].Name}""
+    , ""{_tableColumns[2].Name}""
+    , ""{_tableColumns[3].Name}""
 )
 select
-    ""{_tableColumns[0].ColumnName}""
-    , ""{_tableColumns[1].ColumnName}""
-    , ""{_tableColumns[2].ColumnName}""
-    , ""{_tableColumns[3].ColumnName}""
+    ""{_tableColumns[0].Name}""
+    , ""{_tableColumns[1].Name}""
+    , ""{_tableColumns[2].Name}""
+    , ""{_tableColumns[3].Name}""
 from json_to_recordset('
 [
 ");
@@ -276,10 +276,10 @@ from json_to_recordset('
             stringBuilder.Append($@"
 ]
 ') as x(
-    ""{_tableColumns[0].ColumnName}"" {_tableColumns[0].ColumnType} not null
-    , ""{_tableColumns[1].ColumnName}"" {_tableColumns[1].ColumnType} not null
-    , ""{_tableColumns[2].ColumnName}"" {_tableColumns[2].ColumnType}
-    , ""{_tableColumns[3].ColumnName}"" {_tableColumns[3].ColumnType}
+    ""{_tableColumns[0].Name}"" {_tableColumns[0].Type} not null
+    , ""{_tableColumns[1].Name}"" {_tableColumns[1].Type} not null
+    , ""{_tableColumns[2].Name}"" {_tableColumns[2].Type}
+    , ""{_tableColumns[3].Name}"" {_tableColumns[3].Type}
 );");
             var correctSqlStatement = stringBuilder.ToString().Replace("\r\n", "\n");
             var jsonItemsAsString = jsonItems.AsJsonString();

@@ -60,12 +60,12 @@ namespace HugeJson2SqlTransformer.Sql.Builders
                 var tableColumn = TableColumns[i];
                 if (onlyColumnNames)
                 {
-                    stringBuilder.Append($"\"{tableColumn.ColumnName}\"");
+                    stringBuilder.Append($"\"{tableColumn.Name}\"");
                 }
                 else
                 {
                     stringBuilder.Append(
-                        $"\"{tableColumn.ColumnName}\" {tableColumn.ColumnType}{(tableColumn.Required ? " not null" : "")}");
+                        $"\"{tableColumn.Name}\" {tableColumn.Type}{(tableColumn.Required ? " not null" : "")}");
                 }
             }
 

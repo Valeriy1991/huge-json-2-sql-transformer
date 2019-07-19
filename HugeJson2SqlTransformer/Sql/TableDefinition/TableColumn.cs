@@ -1,15 +1,17 @@
-﻿namespace HugeJson2SqlTransformer.Sql.TableDefinition
+﻿using Newtonsoft.Json;
+
+namespace HugeJson2SqlTransformer.Sql.TableDefinition
 {
     public class TableColumn
     {
-        public string ColumnName { get; }
-        public string ColumnType { get; }
-        public bool Required { get; }
+        public string Name { get; set; }
+        public string Type { get; set; }
+        public bool Required { get; set; }
 
         public TableColumn(string columnName, string columnType, bool required = false)
         {
-            ColumnName = columnName;
-            ColumnType = columnType;
+            Name = columnName;
+            Type = columnType;
             Required = required;
         }
     }
