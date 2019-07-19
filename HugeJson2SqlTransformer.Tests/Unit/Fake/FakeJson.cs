@@ -21,11 +21,23 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Fake
         {
             var faker = new Faker();
             return $@"{{
-	""firstName"": ""{faker.Person.FirstName}"",
-    ""lastName"": ""{faker.Person.LastName}"",
-    ""isClient"": {faker.Random.Bool()},
-    ""email"": ""{faker.Person.Email}""
-}}";
+""firstName"": ""{faker.Person.FirstName}"",
+""lastName"": ""{faker.Person.LastName}"",
+""isClient"": {faker.Random.Bool()},
+""phone"": ""{faker.Person.Phone}""
+}}"
+                .Replace("\r\n", " ");
+        }
+
+        public static string WithNestedObject(this string jsonItem)
+        {
+            var faker = new Faker();
+            var email1 = faker.Person.Email;
+            var email2 = faker.Person.Email;
+            return $@"{jsonItem.TrimEnd('}')}, 
+""emails"": [{{ ""item"": ""{email1}"" }}, {{ ""item"": ""{email2}"" }}]
+}}"
+                .Replace("\r\n", " ");
         }
     }
 }

@@ -239,8 +239,16 @@ from json_to_recordset('
             int limit)
         {
             // Arrange
-            var jsonItems = FakeJson.CreateMultiple(total);
+            var jsonItemWithNestedObject1 = FakeJson.Create().WithNestedObject();
+            var jsonItemWithNestedObject2 = FakeJson.Create().WithNestedObject();
+            var jsonItemWithNestedObject3 = FakeJson.Create().WithNestedObject();
+            var jsonItems = new List<string>(FakeJson.CreateMultiple(total - 3))
+            {
+                jsonItemWithNestedObject1, jsonItemWithNestedObject2, jsonItemWithNestedObject3
+            };
+
             var filteredJsonItems = jsonItems.Skip(skip).Take(limit).ToList();
+
             var stringBuilder = new StringBuilder();
             stringBuilder.Append($@"insert into ""{_schema}"".""{_tableName}"" (
     ""{_tableColumns[0].ColumnName}""

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
@@ -195,7 +196,8 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
         }
 
         [Fact]
-        public async Task ExecuteAsync_FileWithSqlStatementOfInsertValuesWasCreated()
+        public async Task
+            ExecuteAsync_MaxLinesPer1InsertValuesSqlFileIsNullAsDefault_FileWithSqlStatementOfInsertValuesWasCreatedAtOnce()
         {
             // Arrange
             var correctFileName =
@@ -231,6 +233,44 @@ namespace HugeJson2SqlTransformer.Tests.Unit.Transformers
             // Assert
             await _fileWriter.Received(correctInsertValuesSqlFilesCount)
                 .WriteAllTextAsync(Arg.Any<string>(), correctInsertSqlStatement);
+        }
+
+        [Fact]
+        public async Task ExecuteAsync_JsonContentHasItemsWithNestedObjects_SqlStatementOfInsertValuesWasCreatedCorrectTimes()
+        {
+            // Arrange
+            var maxLinesPer1InsertValuesSqlFile = 2;
+            var jsonItem1 = FakeJson.Create();
+            var jsonItem2 = FakeJson.Create();
+            var jsonItem3 = $@"{{
+	""firstName"": ""{_faker.Person.FirstName}"",
+    ""lastName"": ""{_faker.Person.LastName}"",
+    ""isClient"": {_faker.Random.Bool()},
+    ""emails"": [{{ ""item"": ""{_faker.Person.Email}"" }},{{ ""item"": ""{_faker.Person.Email}"" }}]
+}}";
+            var jsonItem4 = $@"{{
+	""firstName"": ""{_faker.Person.FirstName}"",
+    ""lastName"": ""{_faker.Person.LastName}"",
+    ""isClient"": {_faker.Random.Bool()},
+    ""emails"": [{{ ""item"": ""{_faker.Person.Email}"" }},{{ ""item"": ""{_faker.Person.Email}"" }}]
+}}";
+            var jsonItem5 = $@"{{
+	""firstName"": ""{_faker.Person.FirstName}"",
+    ""lastName"": ""{_faker.Person.LastName}"",
+    ""isClient"": {_faker.Random.Bool()},
+    ""emails"": [{{ ""item"": ""{_faker.Person.Email}"" }},{{ ""item"": ""{_faker.Person.Email}"" }}]
+}}";
+            var jsonContent = new List<string>()
+            {
+                jsonItem1, jsonItem2, jsonItem3, jsonItem4, jsonItem5
+            }.AsJsonString();
+            _fileReader.ReadAllTextAsync(_transformOptions.SourceJsonFilePath).Returns(jsonContent);
+
+            _transformOptions.MaxLinesPer1InsertValuesSqlFile = maxLinesPer1InsertValuesSqlFile;
+            // Act
+            await _testModule.ExecuteAsync(_transformOptions);
+            // Assert
+            _sqlBuilder.Received(3).BuildInsert(jsonContent, skip: Arg.Any<int>(), limit: maxLinesPer1InsertValuesSqlFile);
         }
 
         [Fact]

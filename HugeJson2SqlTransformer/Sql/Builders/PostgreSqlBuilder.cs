@@ -102,7 +102,7 @@ namespace HugeJson2SqlTransformer.Sql.Builders
 
         private string ClearJsonItemsForPostgre(string jsonItems, int? skip, int? limit)
         {
-            var rgx1JsonItem = new Regex(@"\{[^\}]+\}");
+            var rgx1JsonItem = new Regex(@"\{.+\}(?=(,)?(\r\n|\n))");
             var jsonItemsMatches = rgx1JsonItem.Matches(jsonItems).Select(e => e.Value).ToList();
             if (skip != null && skip >= 0)
             {
