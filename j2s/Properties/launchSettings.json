@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "j2s": {
+      "commandName": "Project",
+      "commandLineArgs": "--source-json-type=mongodbcompass --target-sql=postgres --limit-inserts=100000"
+    }
+  }
+}
