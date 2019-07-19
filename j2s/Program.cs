@@ -6,28 +6,24 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using HugeJson2SqlTransformer.Files.Abstract;
 using HugeJson2SqlTransformer.Files.Readers.Json;
 using HugeJson2SqlTransformer.Files.Writers;
-using HugeJson2SqlTransformer.Sql;
 using HugeJson2SqlTransformer.Sql.Builders;
 using HugeJson2SqlTransformer.Sql.TableDefinition;
 using HugeJson2SqlTransformer.Transformers;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
 
-namespace HugeJson2SqlTransformer
+namespace j2s
 {
     [ExcludeFromCodeCoverage]
     class Program
     {
-        static Dictionary<string, string> AvailableSourceJsonFileTypes = new Dictionary<string, string>()
+        static readonly Dictionary<string, string> AvailableSourceJsonFileTypes = new Dictionary<string, string>()
         {
             {"mongodbcompass", "MongoDB Compass export file"}
         };
 
-        static Dictionary<string, string> AvailableSqlTypes = new Dictionary<string, string>()
+        static readonly Dictionary<string, string> AvailableSqlTypes = new Dictionary<string, string>()
         {
             {"postgres", "PostgreSQL"}
         };
@@ -51,6 +47,9 @@ namespace HugeJson2SqlTransformer
                 Console.WriteLine("\t--limit-inserts=<number>           Max rows in INSERT statement per 1 *.sql file");
                 Console.WriteLine("\t--columns-definition-file=<path>   Full path to *.json file for SQL table columns definition");
                 Console.WriteLine();
+
+                if (args == null || args.Length == 0)
+                    return;
 
                 var jsonSourceFilePath = GetArgumentValue("--source-json", args);
                 var jsonSourceFileType = GetArgumentValue("--source-json-type", args);
