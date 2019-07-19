@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using HugeJson2SqlTransformer.Files.Abstract;
@@ -23,7 +24,19 @@ namespace HugeJson2SqlTransformer
     {
         static async Task Main(string[] args)
         {
+            var version = Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                .InformationalVersion;
+
             Console.WriteLine("j2s - JSON to SQL files transformer.");
+            Console.WriteLine($"Version: {version}");
+            Console.WriteLine();
+            Console.WriteLine("Arguments:");
+            Console.WriteLine("\t--source-json=<path>\t\t\tFull path to source *.json file");
+            Console.WriteLine("\t--table-name=<name>\t\t\tName of SQL table");
+            Console.WriteLine("\t--schema=<schema_name>\t\t\tName of SQL table schema");
+            Console.WriteLine("\t--limit-inserts=<number>\t\tMax rows in INSERT statement per 1 *.sql file");
+            Console.WriteLine("\t--columns-definition-file=<path>\tFull path to *.json file for SQL table columns definition");
+            Console.WriteLine();
 
             var jsonSourceFilePath = GetArgumentValue("--source-json", args);
             var tableName = GetArgumentValue("--table-name", args);
