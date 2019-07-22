@@ -3,16 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29025.244
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HugeJson2SqlTransformer", "HugeJson2SqlTransformer\HugeJson2SqlTransformer.csproj", "{7EEACF77-AE7A-43C2-9897-6AE8244291EA}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EC3EA26C-C07A-47AD-90BE-2F8664BF40D5}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HugeJson2SqlTransformer.Tests", "HugeJson2SqlTransformer.Tests\HugeJson2SqlTransformer.Tests.csproj", "{63562DBD-3ED9-4885-9C3E-0B7F8FD71845}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "j2s", "j2s\j2s.csproj", "{D4C15854-910C-46D6-84CA-93BE389F0952}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "j2s", "j2s\j2s.csproj", "{D4C15854-910C-46D6-84CA-93BE389F0952}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "j2s.Tests", "j2s.Tests\j2s.Tests.csproj", "{41015BD7-DC63-4412-9768-815E9CD3D414}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,18 +18,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{7EEACF77-AE7A-43C2-9897-6AE8244291EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7EEACF77-AE7A-43C2-9897-6AE8244291EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7EEACF77-AE7A-43C2-9897-6AE8244291EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7EEACF77-AE7A-43C2-9897-6AE8244291EA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{63562DBD-3ED9-4885-9C3E-0B7F8FD71845}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{63562DBD-3ED9-4885-9C3E-0B7F8FD71845}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{63562DBD-3ED9-4885-9C3E-0B7F8FD71845}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{63562DBD-3ED9-4885-9C3E-0B7F8FD71845}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D4C15854-910C-46D6-84CA-93BE389F0952}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D4C15854-910C-46D6-84CA-93BE389F0952}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D4C15854-910C-46D6-84CA-93BE389F0952}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D4C15854-910C-46D6-84CA-93BE389F0952}.Release|Any CPU.Build.0 = Release|Any CPU
+		{41015BD7-DC63-4412-9768-815E9CD3D414}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{41015BD7-DC63-4412-9768-815E9CD3D414}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{41015BD7-DC63-4412-9768-815E9CD3D414}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{41015BD7-DC63-4412-9768-815E9CD3D414}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

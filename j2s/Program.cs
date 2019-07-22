@@ -6,11 +6,11 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using HugeJson2SqlTransformer.Files.Readers.Json;
-using HugeJson2SqlTransformer.Files.Writers;
-using HugeJson2SqlTransformer.Sql.Builders;
-using HugeJson2SqlTransformer.Sql.TableDefinition;
-using HugeJson2SqlTransformer.Transformers;
+using j2s.Files.Readers.Json;
+using j2s.Files.Writers;
+using j2s.Sql.Builders;
+using j2s.Sql.TableDefinition;
+using j2s.Transformers;
 using Newtonsoft.Json;
 
 namespace j2s
