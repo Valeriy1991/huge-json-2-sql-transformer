@@ -187,8 +187,8 @@ select
 from json_to_recordset('
 {jsonItems}
 ') as x(
-    ""{_tableColumns[0].Name}"" {_tableColumns[0].Type} not null
-    , ""{_tableColumns[1].Name}"" {_tableColumns[1].Type} not null
+    ""{_tableColumns[0].Name}"" {_tableColumns[0].Type}
+    , ""{_tableColumns[1].Name}"" {_tableColumns[1].Type}
     , ""{_tableColumns[2].Name}"" {_tableColumns[2].Type}
     , ""{_tableColumns[3].Name}"" {_tableColumns[3].Type}
 );"
@@ -219,8 +219,8 @@ select
 from json_to_recordset('
 {jsonItems.Replace("'", "''")}
 ') as x(
-    ""{_tableColumns[0].Name}"" {_tableColumns[0].Type} not null
-    , ""{_tableColumns[1].Name}"" {_tableColumns[1].Type} not null
+    ""{_tableColumns[0].Name}"" {_tableColumns[0].Type}
+    , ""{_tableColumns[1].Name}"" {_tableColumns[1].Type}
     , ""{_tableColumns[2].Name}"" {_tableColumns[2].Type}
     , ""{_tableColumns[3].Name}"" {_tableColumns[3].Type}
 );"
@@ -276,8 +276,8 @@ from json_to_recordset('
             stringBuilder.Append($@"
 ]
 ') as x(
-    ""{_tableColumns[0].Name}"" {_tableColumns[0].Type} not null
-    , ""{_tableColumns[1].Name}"" {_tableColumns[1].Type} not null
+    ""{_tableColumns[0].Name}"" {_tableColumns[0].Type}
+    , ""{_tableColumns[1].Name}"" {_tableColumns[1].Type}
     , ""{_tableColumns[2].Name}"" {_tableColumns[2].Type}
     , ""{_tableColumns[3].Name}"" {_tableColumns[3].Type}
 );");

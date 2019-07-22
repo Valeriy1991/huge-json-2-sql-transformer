@@ -45,7 +45,7 @@ namespace HugeJson2SqlTransformer.Sql.Builders
                 throw new ArgumentNullException(nameof(Table));
         }
 
-        private string CreateTableColumnsDefinition(bool onlyColumnNames = false)
+        private string CreateTableColumnsDefinition(bool onlyColumnNames = false, bool withRequired = true)
         {
             var stringBuilder = new StringBuilder();
             for (int i = 0; i < TableColumns.Count; i++)
@@ -64,8 +64,12 @@ namespace HugeJson2SqlTransformer.Sql.Builders
                 }
                 else
                 {
-                    stringBuilder.Append(
-                        $"\"{tableColumn.Name}\" {tableColumn.Type}{(tableColumn.Required ? " not null" : "")}");
+                    stringBuilder.Append($"\"{tableColumn.Name}\" {tableColumn.Type}");
+
+                    if (withRequired)
+                    {
+                        stringBuilder.Append($"{(tableColumn.Required ? " not null" : "")}");
+                    }
                 }
             }
 
@@ -85,7 +89,7 @@ namespace HugeJson2SqlTransformer.Sql.Builders
             stringBuilder.Append("\nfrom json_to_recordset('\n");
             stringBuilder.Append(ClearJsonItemsForPostgre(jsonItems, skip, limit));
             stringBuilder.Append("\n') as x(");
-            stringBuilder.Append(CreateTableColumnsDefinition());
+            stringBuilder.Append(CreateTableColumnsDefinition(withRequired: false));
             stringBuilder.Append("\n);");
             return stringBuilder.ToString();
         }
