@@ -1,10 +1,10 @@
 ﻿environment:
-  version_suffix: alpha
-  framework: netcoreapp2.2
-  project: j2s
-  rid: win-x64
+  VERSION_SUFFIX: alpha
+  FRAMEWORK: netcoreapp2.2
+  PROJECT: j2s
+  RID: win-x64
   
-version: 0.0.1-$(version_suffix){build}
+version: 0.0.1-$(VERSION_SUFFIX){build}
 
 # branches to build
 branches:
@@ -15,7 +15,9 @@ branches:
 # abakumov-v: Because tags created by GitHub Release deployment configuration
 skip_tags: true
 
-image: Visual Studio 2019
+image: 
+  - Visual Studio 2019
+  - Ubuntu1804
 
 configuration: Release
 
@@ -34,26 +36,33 @@ before_build:
 - dotnet restore
 
 build_script:
-  - ps: dotnet publish $env:project -c $env:configuration -f $env:framework -r $env:rid --self-contained false
+  - ps: dotnet publish $env:PROJECT -c $env:configuration -f $env:FRAMEWORK -r $env:RID --self-contained false
 
 #after_build:
 #  - ps: 
 
 artifacts:
- - path: '$(project)\bin\$(configuration)\$(framework)\$(rid)\*.*'
+ - path: '$(PROJECT)\bin\$(configuration)\$(FRAMEWORK)\$(RID)\*.*'
+   name: ConsoleApplication
 
-deploy:
- - provider: GitHub
-   name: production-GitHub
-   description: ''
-   artifact: /.*\.zip/
-   draft: true
-   prerelease: true # TODO: (version_suffix != string.empty) ? true : false
-   auth_token:
-     secure: cXU/5uMu5hDP4h2I7NTHUQ4qaDY67P9hDwNVe2hwEijidAJXQe6zX1f1CInMYOcV
-   on:
-     branch: master                # release from master branch only
-     #appveyor_repo_tag: true       # deploy on tag push only 
+for:
+-
+  matrix:
+    only:
+      - image: Visual Studio 2019
+
+  deploy:
+   - provider: GitHub
+     name: production-GitHub
+     description: ''
+     artifact: /.*\.zip/
+     draft: true
+     prerelease: true # TODO: (VERSION_SUFFIX != string.empty) ? true : false
+     auth_token:
+       secure: cXU/5uMu5hDP4h2I7NTHUQ4qaDY67P9hDwNVe2hwEijidAJXQe6zX1f1CInMYOcV
+     on:
+       branch: master                # release from master branch only
+       #appveyor_repo_tag: true       # deploy on tag push only 
   
 # send notification to Slack about build results
 notifications:
