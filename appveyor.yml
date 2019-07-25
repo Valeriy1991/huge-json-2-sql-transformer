@@ -1,6 +1,8 @@
 ﻿environment:
   version_suffix: alpha
-  publishPath: '.\bin\Release\Publish'
+  framework: netcoreapp2.2
+  project: j2s
+  rid: win-x64
   
 version: 0.0.1-$(version_suffix){build}
 
@@ -32,13 +34,13 @@ before_build:
 - dotnet restore
 
 build_script:
-  - ps: dotnet publish -c Release -r win-x64 --self-contained false -o $env:publishPath
+  - ps: dotnet publish $env:project -c $env:configuration -f $env:framework -r $env:rid --self-contained false
 
 #after_build:
 #  - ps: 
 
 artifacts:
- - path: '**\*.*'
+ - path: '$(project)\bin\$(configuration)\$(framework)\$(rid)\*.*'
 
 deploy:
  - provider: GitHub
