@@ -46,6 +46,7 @@ after_build:
 
 test_script:
   - ps: dotnet restore $env:PROJECT.Tests
+  - ps: dotnet build $env:PROJECT.Tests
   - ps: dotnet test
 
 artifacts:
