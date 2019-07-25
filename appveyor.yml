@@ -4,10 +4,6 @@
   
 version: 0.0.1-$(version_suffix){build}
 
-platform:
-  - x86
-  - x64
-
 # branches to build
 branches:
   only:
