@@ -43,14 +43,13 @@ build_script:
 
 artifacts:
  - path: '**\*.*'
- - type: zip
 
 deploy:
  - provider: GitHub
    name: production-GitHub
    description: ''
    artifact: /.*\.zip/
-   draft: false
+   draft: true
    prerelease: true # TODO: (version_suffix != string.empty) ? true : false
    auth_token:
      secure: cXU/5uMu5hDP4h2I7NTHUQ4qaDY67P9hDwNVe2hwEijidAJXQe6zX1f1CInMYOcV
