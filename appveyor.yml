@@ -3,6 +3,7 @@
   FRAMEWORK: netcoreapp2.2
   PROJECT: j2s
   RID: win-x64
+  CONFIGURATION: Release
   
 version: 0.0.1-$(VERSION_SUFFIX){build}
 
@@ -19,7 +20,7 @@ image:
   - Visual Studio 2019
   - Ubuntu1804
 
-configuration: Release
+#configuration: Release
 
 # Patch .NET Core/Standard *.csproj files for versioning:
 dotnet_csproj:
@@ -37,18 +38,18 @@ before_build:
   - ps: dotnet restore
 
 build_script:
-  - ps: dotnet publish $env:PROJECT -c $env:configuration -f $env:FRAMEWORK -r $env:RID --self-contained false -v m
-  - sh: dotnet publish ${PROJECT} -c ${configuration} -f ${FRAMEWORK} -r ${RID} --self-contained false -v m
+  - ps: dotnet publish $env:PROJECT -c $env:CONFIGURATION -f $env:FRAMEWORK -r $env:RID --self-contained false -v m
+  - sh: dotnet publish ${PROJECT} -c ${CONFIGURATION} -f ${FRAMEWORK} -r ${RID} --self-contained false -v m
 
 after_build:
-  - ps: 7z a $env:PROJECT-$env:version-$env:platform.zip $env:APPVEYOR_BUILD_FOLDER\$env:PROJECT\bin\$env:configuration\$env:FRAMEWORK\$env:RID\*.*
+  - ps: 7z a $env:PROJECT-$env:version-$env:platform.zip $env:APPVEYOR_BUILD_FOLDER\$env:PROJECT\bin\$env:CONFIGURATION\$env:FRAMEWORK\$env:RID\*.*
 
 test_script:
   - ps: dotnet restore $env:PROJECT.Tests
   - ps: dotnet test
 
 artifacts:
- - path: '$(PROJECT)\bin\$(configuration)\$(FRAMEWORK)\$(RID)\*.*'
+ - path: '$(PROJECT)\bin\$(CONFIGURATION)\$(FRAMEWORK)\$(RID)\*.*'
    name: ConsoleApplication
 
 for:
