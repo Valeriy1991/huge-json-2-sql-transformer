@@ -33,13 +33,19 @@ dotnet_csproj:
 
 # restore Nuget packages before build:
 before_build:
-- dotnet restore
+  - ps: dotnet --version
+  - ps: dotnet restore
 
 build_script:
-  - ps: dotnet publish $env:PROJECT -c $env:configuration -f $env:FRAMEWORK -r $env:RID --self-contained false
+  - ps: dotnet publish $env:PROJECT -c $env:configuration -f $env:FRAMEWORK -r $env:RID --self-contained false -v m
+  - sh: dotnet publish ${PROJECT} -c ${configuration} -f ${FRAMEWORK} -r ${RID} --self-contained false -v m
 
-#after_build:
-#  - ps: 
+after_build:
+  - ps: 7z a $env:PROJECT-$env:version-$env:platform.zip $env:APPVEYOR_BUILD_FOLDER\$env:PROJECT\bin\$env:configuration\$env:FRAMEWORK\$env:RID\*.*
+
+test_script:
+  - ps: dotnet restore $env:PROJECT.Tests
+  - ps: dotnet test
 
 artifacts:
  - path: '$(PROJECT)\bin\$(configuration)\$(FRAMEWORK)\$(RID)\*.*'
