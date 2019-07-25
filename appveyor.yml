@@ -16,9 +16,7 @@ branches:
 # abakumov-v: Because tags created by GitHub Release deployment configuration
 skip_tags: true
 
-image: 
-  - Visual Studio 2019
-  - Ubuntu1804
+image: Visual Studio 2019
 
 #configuration: Release
 
@@ -39,7 +37,6 @@ before_build:
 
 build_script:
   - ps: dotnet publish $env:PROJECT -c $env:CONFIGURATION -f $env:FRAMEWORK -r $env:RID --self-contained false -v m
-  - sh: dotnet publish ${PROJECT} -c ${CONFIGURATION} -f ${FRAMEWORK} -r ${RID} --self-contained false -v m
 
 after_build:
   - ps: 7z a $env:PROJECT-$env:version-$env:platform.zip $env:APPVEYOR_BUILD_FOLDER\$env:PROJECT\bin\$env:CONFIGURATION\$env:FRAMEWORK\$env:RID\*.*
