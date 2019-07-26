@@ -66,7 +66,7 @@ deploy:
 # send notification to Slack about build results
 notifications:
  - provider: Slack
-   incoming_webhook: https://hooks.slack.com/services/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
+   incoming_webhook: https://hooks.slack.com/services/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
    channel: releases
    on_build_success: true
    on_build_failure: true
