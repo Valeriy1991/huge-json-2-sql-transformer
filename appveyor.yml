@@ -30,7 +30,9 @@ dotnet_csproj:
   file_version: '{version}'
   informational_version: '{version}'
 
-# restore Nuget packages before build:
+install:
+  - cinst dotnetcore-sdk --version 2.2.0 
+
 before_build:
   - ps: dotnet --version
   - ps: dotnet restore
