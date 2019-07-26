@@ -47,7 +47,7 @@ after_build:
 #  - ps: dotnet test
 
 artifacts:
- - path: '$(PROJECT)\bin\$(CONFIGURATION)\$(FRAMEWORK)\$(RID)\*.*'
+ - path: '$(PROJECT)\bin\$(CONFIGURATION)\$(FRAMEWORK)\**\*.zip'
    name: ConsoleApplication
 
 deploy:
